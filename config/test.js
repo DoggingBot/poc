@@ -11,6 +11,9 @@ const commandPrefix = ".";
 const access_key = process.env.test_access_key;
 const json_path = "C:/t/tankees.json";
 const bot_name = "StevieBot";
+const bypassGMU = ['775415118333870131','159985870458322944'];
+const defaultStaffChat = "801188002486812712";
+const writeMessageToDrunkTank = false;
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -23,3 +26,6 @@ exports.access_key = access_key
 exports.json_path = json_path
 exports.bot_name = bot_name
 exports.serverID = serverID
+exports.bypassGMU = bypassGMU
+exports.defaultStaffChat = defaultStaffChat
+exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
