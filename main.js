@@ -384,7 +384,7 @@ function handleHelp(message) {
         "\r\n" + config.commandPrefix +"synctank - sync up the 2drunk2party role with the Bot tank log. " +        
         "\r\n" + config.commandPrefix +"help - Sends this help message" +
         "\r\n" +
-        "\r\n" + config.bot_name + " " + BOT_VERSION + " by stevie_pricks";
+        "\r\n" + config.bot_name + " " + BOT_VERSION + " by stevie_pricks & Sindrah";
 
 
     message.channel.send(help);
