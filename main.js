@@ -34,17 +34,26 @@ client.on("ready", () => {
 client.on("guildMemberUpdate", async (o,n) => {
 	var oldRoles = o._roles;
 	var newRoles = n._roles;
+    //check if the roles have changed
+    if (JSON.stringify(oldRoles) == JSON.stringify(newRoles)) {
+        console.log("Handled event with no role changes");
+        return;
+    }
+
+    //ensure any role changes involves 2drunk2party
+    if (!(oldRoles.includes(config.drunktankRole) || newRoles.includes(config.drunktankRole))) {
+        console.log("Handled role change event that didn't involve 2drunk2party.");
+        return;
+    }
+
+    //This audit log part needs to be pulled out to another js file 
 	var auditlog = await n.guild.fetchAuditLogs({
 		limit: 1,
 		type: 'MEMBER_UPDATE_ROLES'
 	});
 	auditlog = auditlog.entries.first();
 
-    if (JSON.stringify(o._roles) == JSON.stringify(n._roles)) {
-        console.log("Handled event with no role changes");
-        return;
-    }
-
+    //Ensure we don't cause any errors
     if (auditlog.changes == undefined) {
         console.log("Handled event with no audit log changes");
         return;
