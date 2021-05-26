@@ -72,6 +72,24 @@ function untankUser(userToUntank) {
     return user;
 }
 
+function getUser(userToGet) {
+    data = fs.readFileSync(config.json_path);
+    var json = JSON.parse(data)
+    var user;
+    for (n=0;n<json.length; n++) {
+        if (json[n].archive) {
+            continue;   
+        }
+
+        if (json[n].user_tanked == userToGet) {
+            json[n].archive = true;
+            user = json[n];
+        }
+    }
+    return user;
+}
+
+exports.getUser = getUser;
 exports.saveTanking = saveTanking;
 exports.getTankedUsers = getTankedUsers;
 exports.untankUser = untankUser;

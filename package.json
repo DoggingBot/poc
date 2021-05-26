@@ -4,7 +4,7 @@
   "description": "Drunk Tank bot",
   "main": "main.js",
   "scripts": {
-    "test": "node tests.js",
+    "test": "jest --testPathPattern=**/**tests.js",
     "testserver": "node main.js test",
     "testserver:linux": "node main.js test_linux",
     "druncord": "node main.js druncord",
@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "jest": "^27.0.1"
   }
 }

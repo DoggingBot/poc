@@ -79,6 +79,48 @@ function doesUserHaveRole(userObj, roleId) {
     return retval;
 }
 
+
+function parseDurationFromTokens(tokens) {
+    // For finding the possible existence of a specified duration/UoM, we have to set the defaults first found in config. All references to the config defaults must be swapped over to these new local-scope variables.
+    var specifiedDuration = config.tankDuration; // "12"
+    var specifiedUOM = config.tankUOM; // "hours"
+    var mins = /^\d+m$/; // regex matches 1+ digits then an 'm' for minutes
+    var hrs = /^\d+h$/; // regex matches 1+ digits then an 'h' for hours
+    var days = /^\d+d$/; // regex matches 1+ digits then a 'd' for days
+
+    // validate the second arg as the only acceptable location for a specified time/UoM. If the arg doesn't validate for a specified time/UoM, it stays as part of the reason arg.
+    if ((mins.test(tokens[1])) || (hrs.test(tokens[1])) || (days.test(tokens[1]))) {
+        // matched a regex for specified time & UoM.
+        specifiedDuration = Number(tokens[1].substr(0,tokens[1].length-1)); // set duration to the digits only
+        switch (tokens[1].slice(-1)) {
+            case "m":
+                specifiedUOM = "minutes";
+                break;
+            case "h":
+                specifiedUOM = "hours";
+                break;
+            case "d":
+                specifiedUOM = "days";
+                break;
+        }
+        tokens.splice(1,1); // remove the specified time /UoM arg from the tokens array        
+    }
+    
+    return {
+        uom: specifiedUOM,
+        duration: specifiedDuration,
+        newTokens: tokens
+    }
+  
+
+}
+
+function getAtString(userId) {
+    return "<@"+userId+">";
+}
+
+exports.getAtString = getAtString;
+exports.parseDurationFromTokens = parseDurationFromTokens;
 exports.getDateDiffString = getDateDiffString;
 exports.getReason = getReason;
 exports.validateReason = validateReason;

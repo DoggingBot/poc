@@ -10,19 +10,19 @@ function confirm_untank_message(author, tankee, reason, drunktankRole) {
     "\r\nWith Reason: " + reason +
     "\r\nI have removed 2Drunk2Party, and returned their original roles: " + drunktankRole;
 }
-function log_blue_tank_msg(author, tankee, userToTank, reason) {
+function log_blue_tank_msg(author, tankTaggedString, tankedUsername, tankedUserID, reason) {
     return "=== DRUNK TANKED ===" +
-    "\r\nNickname: " + userToTank +
-    "\r\nUsername: " + tankee.user.username +
-    "\r\nId: " + tankee.user.id +
+    "\r\Tag: " + tankTaggedString +
+    "\r\nUsername: " + tankedUsername +
+    "\r\nId: " + tankedUserID +
     "\r\nDrunk tanked by " + author + 
     "\r\nReason: " + reason
 }
-function log_blue_untank_msg(author, tankee, userToTank, reason, datediff) {
+function log_blue_untank_msg(author, tankTaggedString, tankedUsername, tankedUserID, reason, datediff) {
     return "=== UNTANKED ===" +
-    "\r\nNickname: " + userToTank +
-    "\r\nUsername: " + tankee.user.username +
-    "\r\nId: " + tankee.user.id +
+    "\r\Tag: " + tankTaggedString +
+    "\r\nUsername: " + tankedUsername +
+    "\r\nId: " + tankedUserID +
     "\r\nUntanked by " + author +
     "\r\nReason: " + reason +
     "\r\nThey were in the tank for " + datediff;
