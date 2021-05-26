@@ -40,6 +40,11 @@ client.on("guildMemberUpdate", async (o,n) => {
 	});
 	auditlog = auditlog.entries.first();
 
+    if (JSON.stringify(o._roles) == JSON.stringify(n._roles)) {
+        console.log("Handled event with no role changes");
+        return;
+    }
+
     if (auditlog.changes == undefined) {
         console.log("Handled event with no audit log changes");
         return;
