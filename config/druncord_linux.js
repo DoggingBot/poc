@@ -13,6 +13,7 @@ const json_path = "tankees.json";
 const bot_name = "TankCommander";
 const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944'];
 const defaultStaffChat = "753779129740034209";
+const writeMessageToDrunkTank = false;
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -27,3 +28,4 @@ exports.bot_name = bot_name
 exports.serverID = serverID
 exports.bypassGMU = bypassGMU
 exports.defaultStaffChat = defaultStaffChat
+exports.writeMessageToDrunkTank = writeMessageToDrunkTank;

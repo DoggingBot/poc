@@ -45,10 +45,12 @@ async function tankUser(guild, tankedMember, authorStr, reason, duration, uom) {
         return MESSAGING.write_to_channel(guild, CONFIG.logChannel, errorMsg);
     }
 
-    setTimeout(() => {
-        msg = MESSAGING.tank_msg(authorStr, HELPERS.getAtString(tankedMember), reason,  duration, uom);
-        MESSAGING.write_to_channel(guild, CONFIG.tankChannel, msg);
-    }, 10000);
+    if (CONFIG.writeMessageToDrunkTank) {
+        setTimeout(() => {
+            msg = MESSAGING.tank_msg(authorStr, HELPERS.getAtString(tankedMember), reason,  duration, uom);
+            MESSAGING.write_to_channel(guild, CONFIG.tankChannel, msg);
+        }, 10000);
+    }
 }
 
 /*
