@@ -39,8 +39,18 @@ client.on("guildMemberUpdate", async (o,n) => {
 		type: 'MEMBER_UPDATE_ROLES'
 	});
 	auditlog = auditlog.entries.first();
+
+    if (auditlog.changes == undefined) {
+        console.log("Handled event with no audit log changes");
+        return;
+    }
+    if (auditlog.changes[0]["new"] == undefined) {
+        console.log("Handled event with no audit log NEW changes");
+        return;
+    }
 	
     if (config.bypassGMU.includes(auditlog.executor.id)) {
+        console.log("Handled event performed by the bot");
         //Action was by the bot;
         return;
     }
