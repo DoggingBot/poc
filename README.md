@@ -16,6 +16,21 @@ node main.js configfilename
 
 Will load the app with config file located in ./config/configfilename.js
 
+Behaviour:
+The Bot will react to the following events:
+* a member is given the drunktankRole
+* a member has the drunktankRole taken away
+
+The Bot will respond to the following commands:
+* .tank - drunk tanks a user. usage: .tank @user reason.
+* .checktank - Checks the current users in the tank.
+* .untank - Untank a user. usage: .untank @user reason.
+* .tankstats - Stats for fun. 
+* .synctank - sync up the 2drunk2party role with the Bot tank log. 
+* .help - Sends this help message
+
+When a user is tanked, the bot will automatically remove all of their other roles (provided it has permissions to). It will re-grant these roles when a user is untanked. This will work either via the commands or the handled events.
+
 Options:
 
 * drunktankRole = Role ID for the role that locks a user out of the other channels
@@ -28,6 +43,10 @@ Options:
 * access_key = Your discord bot access key. Keep this in .env and access via process.env
 * json_path = Path to a local json file that the app can use for storage.
 * bot_name = Give your bot a name. Call it whatever you please.
+* bypassGMU = Array of ID's for events the bot should ignore
+* defaultStaffChat = channel id of the staff channel. Not used at present.
+* writeMessageToDrunkTank = True to message the drunk tank channel telling the user why, false if not.
+* warnAuthorizedUsage = True to warn users for trying to command it with authorization, false if not.
 
 NB: Be careful with your access key. Keep it out of source control. I keep mine in .env and have it gitignored.
 
@@ -35,7 +54,6 @@ NB: Be careful with your access key. Keep it out of source control. I keep mine 
 TODO LIST (Features)
 - Disconnect users from any voice channels on tanking
 - Auto untank after time served (controversial)
-- Allow a user to specify duration with command ie .tank @user 12h reasons
 - Improve reporting - expand tankstats to allow profiling individual users ie .checkuser @user could return all the times they were tanked and the reasons etc
 - Last warning system - mark a user as on their last warning and auto-ban on next tank
 - Improve user access control to enable granular access to commands rather than all or nothing

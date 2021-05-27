@@ -9,11 +9,13 @@ const tankUOM = "hours";
 const tankDuration = "12";
 const commandPrefix = ".";
 const access_key = process.env.test_access_key;
-const json_path = "tankees.json";
+const json_path = "C:/t/tankees.json";
 const bot_name = "StevieBot";
 const bypassGMU = ['775415118333870131','159985870458322944'];
 const defaultStaffChat = "801188002486812712";
 const writeMessageToDrunkTank = false;
+const warnAuthorizedUsage = false;
+
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -29,3 +31,4 @@ exports.serverID = serverID
 exports.bypassGMU = bypassGMU
 exports.defaultStaffChat = defaultStaffChat
 exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
+exports.warnAuthorizedUsage = warnAuthorizedUsage;

@@ -1,19 +1,21 @@
 require('dotenv').config();
 
-const drunktankRole = "753777735452852324";
-const tankChannel = "757031918628765806";
-const logChannel = "753778482844270605";
-const botMasterRole = "753412065456291901";
+const drunktankRole = "795125880363679745";
+const tankChannel = "795125618957484052";
+const logChannel = "795125578494640188";
+const botMasterRole = "846036899523985449";
 const serverID = "795115424634372147";
 const tankUOM = "hours";
 const tankDuration = "12";
 const commandPrefix = ".";
-const access_key = process.env.druncord_access_key;
+const access_key = process.env.test_access_key;
 const json_path = "tankees.json";
-const bot_name = "TankCommander";
-const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944'];
-const defaultStaffChat = "753779129740034209";
+const bot_name = "StevieBot";
+const bypassGMU = ['775415118333870131','159985870458322944'];
+const defaultStaffChat = "801188002486812712";
 const writeMessageToDrunkTank = false;
+const warnAuthorizedUsage = false;
+
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -29,3 +31,4 @@ exports.serverID = serverID
 exports.bypassGMU = bypassGMU
 exports.defaultStaffChat = defaultStaffChat
 exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
+exports.warnAuthorizedUsage = warnAuthorizedUsage;

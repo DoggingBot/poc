@@ -1,3 +1,5 @@
+const BOT_VERSION = "1.1.0";
+
 var config ;
 
 function injectConfig(myConfig) {
@@ -71,14 +73,13 @@ function trimMsg(message) {
 function doesUserHaveRole(userObj, roleId) {
     var retval = false;
 
-    for (n=0;n<userObj._roles.length;n++) {
-        if (userObj._roles[n] == roleId) {
+    for (n=0;n<userObj.roles.length;n++) {
+        if (userObj.roles[n] == roleId) {
             retval = true;
         }
     }
     return retval;
 }
-
 
 function parseDurationFromTokens(tokens) {
     // For finding the possible existence of a specified duration/UoM, we have to set the defaults first found in config. All references to the config defaults must be swapped over to these new local-scope variables.
@@ -123,6 +124,29 @@ function getOldRoles(tankedMember){
     return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
 } 
 
+function removeRoleFromArray(roleArray, roleIdToRemove) {
+    for( var i = 0; i < roleArray.length; i++){ 
+        if (roleArray[i] === roleIdToRemove) { 
+            roleArray.splice(i, 1); 
+            return roleArray;
+        }
+    }
+    return roleArray;
+}
+
+async function convertRoleIdArrayToRoleNameArray(rolesToConvert, guildService) {
+    retval = [];
+
+    for (n = 0; n< rolesToConvert.length; n++) {
+        r = await guildService.getRole(rolesToConvert[n]);
+        retval.push(r.name.toString());
+    }
+
+    return retval;
+}
+
+exports.convertRoleIdArrayToRoleNameArray = convertRoleIdArrayToRoleNameArray;
+exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;
 exports.getAtString = getAtString;
 exports.parseDurationFromTokens = parseDurationFromTokens;
@@ -135,3 +159,4 @@ exports.trimCommand = trimCommand;
 exports.trimMsg = trimMsg;
 exports.injectConfig = injectConfig;
 exports.doesUserHaveRole = doesUserHaveRole;
+exports.BOT_VERSION = BOT_VERSION;
