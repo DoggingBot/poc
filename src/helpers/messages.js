@@ -2,7 +2,7 @@ function confirm_message(authorNickname, tankTaggedString, reason, drunktankRole
     return authorNickname + 
     "\r\nCommanded me to drunk tank " + tankTaggedString +
     "\r\nWith Reason: " + reason +
-    "\r\nI have removed all their roles: " + roles.toString() +
+    "\r\nI have removed all their roles: " + roles +
     "\r\nI have granted: " + drunktankRole;
 }
 function confirm_untank_message(authorNickname, tankTaggedString, reason, rolesGivenBack) {

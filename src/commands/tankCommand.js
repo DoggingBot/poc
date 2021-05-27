@@ -6,9 +6,8 @@ const HELPERS = require('../helpers/helpers');
 const MESSAGES = require('../helpers/messages');
 
 var CONFIG;
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 async function handle(message) {
@@ -16,7 +15,7 @@ async function handle(message) {
 
     var tankedMemberId = message.mentions.users.first().id;
     var author =  guildService.getMemberFromCache(message.author.id);
-    var role = guildService.getRole(CONFIG.drunktankRole);
+    var role = await guildService.getRole(CONFIG.drunktankRole);
 
     tokens = HELPERS.tokenize(msg.substr(1,msg.length -1 ));
 
@@ -37,14 +36,14 @@ async function handle(message) {
         return;
     }
     //Make sure we have a mention on the message
-    if (!HELPERS.validateMentions(message, "tank", config.commandPrefix)) {
+    if (!HELPERS.validateMentions(message, "tank", CONFIG.commandPrefix)) {
         return;
     }
 
     //actually tank the user
     return drunkTankService.tankUser(tankedMemberId, author.id, reason, tankedFor.duration, tankedFor.uom)
         .then( (roles) => {
-            msg = MESSAGES.confirm_message(author.nickname, HELPERS.getAtString(tankedMemberId), reason, role.name, roles);
+            msg = MESSAGES.confirm_message(author.nickname, HELPERS.getAtString(tankedMemberId), reason, role.name, roles.roles);
             return message.channel.send(msg);
         });
 }

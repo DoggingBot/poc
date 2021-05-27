@@ -1,19 +1,18 @@
 
 var guildService = require('../services/guildService');
-var persistenceSrvice = require('../services/drunktankService');
+var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 
 var CONFIG;
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 async function handle(message) {
     msg = HELPERS.trimMsg(message);
     refreshedRoleObj = await guildService.getRole(CONFIG.drunktankRole);
-    var tankees = persistenceSrvice.getTankedUsers();
+    var tankees = persistenceService.getTankedUsers();
     var tankedDict = {};
 
     for (n=0;n<tankees.length; n++) {
@@ -26,7 +25,7 @@ async function handle(message) {
 
     var toSaveTank = [];
     var usersWithRoleDict = {};
-    refreshedRoleObj.forEach( (userId) => {
+    refreshedRoleObj.members.forEach( (userId) => {
         var dictKey = userId;
 
         if (tankedDict[dictKey] == undefined) {
@@ -49,11 +48,11 @@ async function handle(message) {
     }
 
     toSaveTank.forEach((x)=> {
-        persistenceSrvice.saveTanking(x, "Unknown", "Added by synctank command", config.tankDuration, config.tankDuration, []);
+        persistenceService.saveTanking(x, "Unknown", "Added by synctank command", config.tankDuration, config.tankDuration, []);
     });
 
     toSaveUntank.forEach((x)=> {
-        persistenceSrvice.untankUser(x);
+        persistenceService.untankUser(x);
     });
 
     message.channel.send("TankSync complete. " + toSaveTank.length + " entries added to the tank log, " + toSaveUntank.length + " removed.");

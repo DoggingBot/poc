@@ -1,5 +1,5 @@
 
-var persistenceSrvice = require('../services/drunktankService');
+var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 
@@ -10,7 +10,7 @@ function injectConfig(_cfg) {
 
 async function handle(message) {
     let ts = Date.now();
-    var json = persistenceSrvice.getTankedUsers();
+    var json = persistenceService.getTankedUsers();
     var concat = "";
     var toSend = [];
     for (n=0;n<json.length; n++) {

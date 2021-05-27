@@ -1,5 +1,5 @@
 
-var persistenceSrvice = require('../services/drunktankService');
+var persistenceService = require('../services/persistenceService');
 
 var CONFIG;
 function injectConfig(_cfg) {
@@ -7,7 +7,7 @@ function injectConfig(_cfg) {
 }
 
 async function handle(message) {
-    var json = persistenceSrvice.getTankedUsers();
+    var json = persistenceService.getTankedUsers();
 
     var tankerStats = {};
     var tankeeStats = {};

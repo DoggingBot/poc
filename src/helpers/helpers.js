@@ -73,8 +73,8 @@ function trimMsg(message) {
 function doesUserHaveRole(userObj, roleId) {
     var retval = false;
 
-    for (n=0;n<userObj._roles.length;n++) {
-        if (userObj._roles[n] == roleId) {
+    for (n=0;n<userObj.roles.length;n++) {
+        if (userObj.roles[n] == roleId) {
             retval = true;
         }
     }
@@ -136,10 +136,12 @@ function removeRoleFromArray(roleArray, roleIdToRemove) {
 
 async function convertRoleIdArrayToRoleNameArray(rolesToConvert, guildService) {
     retval = [];
-    await rolesToConvert.forEach(async (roleId)=> {
-        r = await guildService.getRole(roleId);
-        retval.push(r.name);
-    });
+
+    for (n = 0; n< rolesToConvert.length; n++) {
+        r = await guildService.getRole(rolesToConvert[n]);
+        retval.push(r.name.toString());
+    }
+
     return retval;
 }
 

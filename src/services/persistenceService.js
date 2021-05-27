@@ -2,13 +2,13 @@ var fs = require('fs');
 var CONFIG;
 
 function injectConfig(myConfig) {
-    config = myConfig;
+    CONFIG = myConfig;
 }
 
 /*
 Save an individual user tanking event
 */
-function saveTanking(userToTankId, authorId, reason, duration, uom, oldRoles) {
+function saveTanking(userToTankId, authorNickname, reason, duration, uom, oldRoles) {
     let ts = Date.now();
     let untank_time = 0;
 
@@ -26,7 +26,7 @@ function saveTanking(userToTankId, authorId, reason, duration, uom, oldRoles) {
 
     tankee_obj = {
         user_tanked: userToTankId,
-        tanked_by: authorId,
+        tanked_by: authorNickname,
         reason: reason, 
         time_tanked: ts,
         time_to_untank: untank_time,
@@ -39,7 +39,7 @@ function saveTanking(userToTankId, authorId, reason, duration, uom, oldRoles) {
         fs.writeFileSync(CONFIG.json_path, JSON.stringify([tankee_obj]));
     }
     else {
-        var data = fs.readFileSync(config.json_path);
+        var data = fs.readFileSync(CONFIG.json_path);
         var json = JSON.parse(data);
         json.push(tankee_obj);
         fs.writeFileSync(CONFIG.json_path, JSON.stringify(json));

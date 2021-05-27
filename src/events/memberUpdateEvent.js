@@ -1,15 +1,14 @@
 
 var guildService = require('../services/guildService');
 var drunkTankService = require('../services/drunktankService');
-var persistenceSrvice = require('../services/drunktankService');
+var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 const MESSAGES = require('../helpers/messages');
 
 var CONFIG;
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 
@@ -27,7 +26,7 @@ async function handle(oldMember, newMember) {
     }
 
     //ensure any role changes involves 2drunk2party
-    if (!(oldRoles.includes(config.drunktankRole) || newRoles.includes(config.drunktankRole))) {
+    if (!(oldRoles.includes(CONFIG.drunktankRole) || newRoles.includes(CONFIG.drunktankRole))) {
         console.log("Handled role change event that didn't involve 2drunk2party.");
         return;
     }
@@ -39,22 +38,21 @@ async function handle(oldMember, newMember) {
         tankedUserId = newMember.user.id;
         authorId = responseObj.authorId;
         reason = "Manual Tanking";
-        duration = config.tankDuration;
-        uom = config.tankUOM;
+        duration = CONFIG.tankDuration;
+        uom = CONFIG.tankUOM;
         auditAction = responseObj.auditAction;
 
-
 		// Drunktank Role is involved in this audit log for the affected user, and not done by a bypassing User.
-		if (oldRoles.includes(config.drunktankRole) && 
-            !newRoles.includes(config.drunktankRole) &&
+		if (oldRoles.includes(CONFIG.drunktankRole) && 
+            !newRoles.includes(CONFIG.drunktankRole) &&
 		    auditAction === "$remove") {
 			//Looks like 2Drunk2Party was removed
-            tankedUserJson = persistenceSrvice.getUser(tankedUserId); 
-			return drunkTankService.untankUser(tankedUser, authorId, tankedUserJson);
+            tankedUserJson = persistenceService.getUser(tankedUserId); 
+			return drunkTankService.untankUser(tankedUserId, authorId, tankedUserJson);
 
 		} 
-        if (!oldRoles.includes(config.drunktankRole) && 
-            newRoles.includes(config.drunktankRol) && 
+        if (!oldRoles.includes(CONFIG.drunktankRole) && 
+            newRoles.includes(CONFIG.drunktankRole) && 
 		    auditAction === "$add")	{
 			//Looks like 2Drunk2Party was added 
             return drunkTankService.tankUser(tankedUserId, authorId, reason, duration, uom);

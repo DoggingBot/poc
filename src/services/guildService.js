@@ -2,9 +2,16 @@ var TheGuild;
 function injectGuild(guild) {
     TheGuild = guild;
 }
+var CONFIG;
+
+function injectConfig(_cfg, guildSvc) {
+    CONFIG = _cfg;
+    guildService = guildSvc;
+}
+
 
 async function writeToChannel(channelId, message) {
-    var channel = TheGuild.channels.cache[channelId];
+    var channel = TheGuild.channels.cache.get(channelId);
     return channel.send(message);
 }
 
@@ -18,12 +25,13 @@ async function getRole(roleId) {
 }
 
 function getMemberFromCache(userId) {
-    userObj = TheGuild.members.cache[userId];
+    userObj = TheGuild.members.cache.get(userId);
+
     return { 
         id:  userObj.id,
-        nickname:  userObj.nickname,
+        nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
         userid:  userObj.user.id,
-        roles: userObj.roles.map(role => role.id)
+        roles: userObj._roles//.map(role => role.id)
     }
 }
 
@@ -39,18 +47,20 @@ async function setRolesForMember(userId, roles) {
 }
 
 async function getMemberForceLoad(userId) {
+   
+
     fetchObj = {
         user: userId,
         cache: false,
         force: true
     };
-
     userObj = await TheGuild.members.fetch(fetchObj);
+
     return { 
         id:  userObj.id,
-        nickname:  userObj.nickname,
+        nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
         username:  userObj.user.username,
-        roles: userObj.roles.map(role => role.id)
+        roles: userObj._roles//.map(role => role.id)
     }
 }
 
@@ -105,3 +115,4 @@ exports.writeToChannel = writeToChannel;
 exports.getMemberFromCache = getMemberFromCache;
 exports.getMemberForceLoad = getMemberForceLoad;
 exports.injectGuild = injectGuild;
+exports.injectConfig = injectConfig;

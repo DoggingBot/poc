@@ -22,8 +22,9 @@ uom = string
 */
 async function tankUser(userToTankId, authorId, reason, duration, uom) {
 
-    var userToTankObj = guildService.getMemberForceLoad(userToTankId);
+    var userToTankObj = await guildService.getMemberForceLoad(userToTankId);
     var authorObj = guildService.getMemberFromCache(authorId);
+
 
     console.log("Drunk tanking " + userToTankObj.nickname + " -- initiated by " + authorObj.nickname);
   
@@ -46,7 +47,7 @@ async function tankUser(userToTankId, authorId, reason, duration, uom) {
         await guildService.writeToChannel(CONFIG.logChannel, msg);
 
         //Save the tanking
-        persistenceService.saveTanking(userToTankId, authorId, reason, duration, uom, userToTankObj.roles);
+        persistenceService.saveTanking(userToTankId, authorObj.nickname, reason, duration, uom, userToTankObj.roles);
 
         //if enabled, write a notification to the drunk tank channel after 10 seconds
         if (CONFIG.writeMessageToDrunkTank) {
@@ -110,7 +111,7 @@ async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
         await guildService.setRolesForMember(untankedMemberId, rolesToGiveBack);
 
         //Construct the blue log message
-        msg = MESSAGING.log_blue_untank_msg(
+        msg = MESSAGES.log_blue_untank_msg(
             authorObj.nickname,
             HELPERS.getAtString(untankedMemberId), 
             untankedUserObj.username, 
@@ -131,15 +132,13 @@ async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
         });
 
     } catch(error)  {
-        var errorMsg = "Failed to handle tanking for user: " + userToTankId + 
+        var errorMsg = "Failed to handle tanking for user: " + untankedMemberId + 
         "\r\nDo I have the permissions to manage this user?" +
         "\r\n"+error;
 
         await guildService.writeToChannel(CONFIG.logChannel, errorMsg);
 
-        return Promise.resolve({
-            success: false
-        });
+        return Promise.reject(error);
     };
 }
 

@@ -1,17 +1,19 @@
 
 var guildService = require('../services/guildService');
 var drunkTankService = require('../services/drunktankService');
+var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 const MESSAGES = require('../helpers/messages');
 
 var CONFIG;
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 async function handle(message) {
+    msg = HELPERS.trimMsg(message);
+
     tokens = HELPERS.tokenize(msg.substr(1,msg.length -1 ));
         
     if (tokens.length < 1) {
@@ -19,7 +21,7 @@ async function handle(message) {
         return;
     }
     var reason = HELPERS.getReason(tokens);
-    if (!HELPERS.validateMentions(message, "untank", config.commandPrefix)) {
+    if (!HELPERS.validateMentions(message, "untank", CONFIG.commandPrefix)) {
         return;
     }
     if (reason.replace(/[^A-Za-z0-9]/g, '') == "") {
@@ -29,7 +31,7 @@ async function handle(message) {
     var tankedMemberId = message.mentions.users.first().id;
     var author =  guildService.getMemberFromCache(message.author.id);
 
-    userJson = persistence.getUser(untankedMember.user.id);
+    userJson = persistenceService.getUser(tankedMemberId);
 
     if (userJson == undefined){
         //dont do anything if they are not in our log. we might strip them of their roles by accident.
@@ -38,7 +40,7 @@ async function handle(message) {
 
     return drunkTankService.untankUser(tankedMemberId, author.id, userJson)
         .then((rolesGivenBack)=> {
-            msg = MESSAGES.confirm_untank_message(author.nickname, HELPERS.getAtString(tankedMemberId), reason, rolesGivenBack);
+            msg = MESSAGES.confirm_untank_message(author.nickname, HELPERS.getAtString(tankedMemberId), reason, rolesGivenBack.roles);
             return message.channel.send(msg);
         });
 }
