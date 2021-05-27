@@ -170,7 +170,7 @@ async function handleSyncTank(message) {
     var toSave = [];
     var usersWithRoleDict = {};
     refreshedRoleObj.members.forEach( (key,value) => {
-        var dictKey = key.userId;
+        var dictKey = key.id;
 
         if (tankedDict[dictKey] == undefined) {
             //we need to add this user to the tank json.
