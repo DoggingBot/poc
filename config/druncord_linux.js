@@ -11,9 +11,11 @@ const commandPrefix = ".";
 const access_key = process.env.druncord_access_key;
 const json_path = "tankees.json";
 const bot_name = "TankCommander";
-const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944'];
+const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944'];//Bot itself, druncord and mee6
 const defaultStaffChat = "753779129740034209";
 const writeMessageToDrunkTank = false;
+const warnAuthorizedUsage = false;
+
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -29,3 +31,4 @@ exports.serverID = serverID
 exports.bypassGMU = bypassGMU
 exports.defaultStaffChat = defaultStaffChat
 exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
+exports.warnAuthorizedUsage = warnAuthorizedUsage;

@@ -1,10 +1,9 @@
 {
-  "name": "drunk_tank_bot",
-  "version": "1.0.0",
+  "name": "tank_commander",
+  "version": "0.0.1",
   "description": "Drunk Tank bot",
   "main": "main.js",
   "scripts": {
-    "test": "jest --testPathPattern= tests/tank.test.js",
     "testserver": "node main.js testcfg",
     "testserver:linux": "node main.js test_linux",
     "druncord": "node main.js druncord",
