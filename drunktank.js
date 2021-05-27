@@ -13,11 +13,6 @@ function injectDependencies(_cfg, _persistence, _messaging, _helpers) {
     HELPERS = _helpers;
 }
 
-
-function getOldRoles(tankedMember){
-    return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
-} 
-
 /*
 guild = Guild
 tankedMember = GuildMember
@@ -27,7 +22,7 @@ duration = string
 uom = string
 */
 async function tankUser(guild, tankedMember, authorStr, reason, duration, uom) {
-    var oldRoles = getOldRoles(tankedMember);
+    var oldRoles = HELPERS.getOldRoles(tankedMember);
 
     console.log("Drunk tanking " + tankedMember + " -- initiated by " + authorStr);
   
@@ -64,7 +59,6 @@ Returns the roles we gave them back as a string
 async function untankUser(guild, untankedMember, untankedMemberJson, authorStr) {
     //make sure we don't accidently give back the same role
     //this is kinda lazy tbh should really do this upon tanking
-    var rolesToGiveBack = [];
     if (untankedMemberJson != undefined) {
         for( var i = 0; i < untankedMemberJson.roles_to_give_back.length; i++){ 
             if (untankedMemberJson.roles_to_give_back[i] === untankedMemberJson.role_to_remove) { 
@@ -72,13 +66,18 @@ async function untankUser(guild, untankedMember, untankedMemberJson, authorStr) 
             }
         }
     }
-    rolesToGiveBack = untankedMemberJson.roles_to_give_back;
+    var rolesToGiveBack = untankedMemberJson.roles_to_give_back;
 
     var rolesToGiveBackStr = [];
+
+    if (rolesToGiveBack != undefined) {
+        rolesToGiveBack = [];
+    }
     await rolesToGiveBack.forEach(async (roleId)=> {
         r = await guild.roles.fetch(roleId);
         rolesToGiveBackStr.push(r.name.replace("@","")); //lets not @ anyone
     }) ;
+
 
     try {
         await untankedMember.roles.set(rolesToGiveBack);

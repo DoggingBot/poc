@@ -119,6 +119,11 @@ function getAtString(userId) {
     return "<@"+userId+">";
 }
 
+function getOldRoles(tankedMember){
+    return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
+} 
+
+exports.getOldRoles = getOldRoles;
 exports.getAtString = getAtString;
 exports.parseDurationFromTokens = parseDurationFromTokens;
 exports.getDateDiffString = getDateDiffString;
