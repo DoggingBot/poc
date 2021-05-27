@@ -1,5 +1,6 @@
 
 var persistenceService = require('../services/persistenceService');
+const HELPERS = require('../helpers/helpers');
 
 var CONFIG;
 function injectConfig(_cfg) {
@@ -7,7 +8,7 @@ function injectConfig(_cfg) {
 }
 
 async function handle(message) {
-    var json = persistenceService.getTankedUsers();
+    var json = persistenceService.getTankHistory();
 
     var tankerStats = {};
     var tankeeStats = {};
@@ -41,11 +42,11 @@ async function handle(message) {
     var msg = "There are " + currentTanked + " people currently tanked.";
     msg += "\r\n"+everTanked+" tankings have occurred in total.";
     msg += "\r\n"+Object.keys(tankeeStats).length+" unique users have been tanked.";
-    msg += "\r\n==Drunk tank hall of shame==";
+    msg += "\r\n\r\n==Drunk tank hall of shame==";
     tankeeTopFive.forEach((obj,i)=> {
-        msg+= "\r\n" + (i + 1) + ". " + obj.name + " has been tanked " + obj.count + " times.";
+        msg+= "\r\n" + (i + 1) + ". " + HELPERS.getAtString(obj.name) + " has been tanked " + obj.count + " times.";
     });
-    msg += "\r\n==Most Korrupt Mods==";
+    msg += "\r\n\r\n==Most Korrupt Mods==";
     tankerTopFive.forEach((obj,i) => {
 			  let vn = "";
 				let vc = 0;
@@ -56,7 +57,7 @@ async function handle(message) {
 						}
 			  });
 				if (obj.name != "") {
-            msg += "\r\n" + (i + 1) + ". " + obj.name + " has tanked on " + obj.count + " occasions ("+Object.keys(tankerStats[obj.name]).length+" unique users). Favourite victim: " + vn;
+            msg += "\r\n" + (i + 1) + ". " + obj.name + " has tanked on " + obj.count + " occasions ("+Object.keys(tankerStats[obj.name]).length+" unique users). Favourite victim: " +  HELPERS.getAtString(vn);
         }
     });
     

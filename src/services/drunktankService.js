@@ -91,7 +91,7 @@ Returns the roles we gave them back as a string
 */
 async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
 
-    var untankedUserObj = guildService.getMemberForceLoad(untankedMemberId);
+    var untankedUserObj = await guildService.getMemberForceLoad(untankedMemberId);
     var authorObj = guildService.getMemberFromCache(authorId);
 
     //make sure we don't accidently give back the 2drunk2party role

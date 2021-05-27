@@ -81,6 +81,18 @@ function getTankedUsers() {
 }
 
 /*
+returns a json array of all full tank history
+*/
+function getTankHistory() {
+    if (!fs.existsSync(CONFIG.json_path)) {
+        return [];
+    }
+    var data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data)
+    return json;
+}
+
+/*
 returns a json representation of a tanked user if there is one
 */
 function getUser(userIdToGet) {
@@ -95,3 +107,4 @@ exports.saveTanking = saveTanking;
 exports.getTankedUsers = getTankedUsers;
 exports.saveUntanking = saveUntanking;
 exports.injectConfig = injectConfig;
+exports.getTankHistory = getTankHistory;
