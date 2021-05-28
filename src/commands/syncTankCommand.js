@@ -52,7 +52,7 @@ async function handle(message) {
     });
 
     toSaveUntank.forEach((x)=> {
-        persistenceService.untankUser(x);
+        persistenceService.saveUntanking(x);
     });
 
     message.channel.send("TankSync complete. " + toSaveTank.length + " entries added to the tank log, " + toSaveUntank.length + " removed.");
