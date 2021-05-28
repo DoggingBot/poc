@@ -107,7 +107,7 @@ function addSip(sipStr, userID) {
     var obj = getSipCountForUser(sipStr, userID);
     if (obj == undefined) {
         obj = {
-            userID: "userID",
+            userID: userID,
             count: "1",
             sipStr: sipStr
         }
@@ -120,10 +120,23 @@ function addSip(sipStr, userID) {
     } else {
         var data = fs.readFileSync(CONFIG.countedJsonPath);
         var json = JSON.parse(data);
-        json.push(obj);
+
+        var toAdd=true;
+        for (n=0;n<json.length; n++) {
+            x = json[n];
+            if (x.userID == obj.userID && x.sipStr == obj.sipStr) {
+                x.count = obj.count;
+                toAdd = false;
+            }
+        }
+
+        if (toAdd) {
+            json.push(obj);
+        }
+        
         fs.writeFileSync(CONFIG.countedJsonPath, JSON.stringify(json));
     }
-
+    return obj;
 }
 
 function getAllSips() {
@@ -133,6 +146,13 @@ function getAllSips() {
 }
 
 function getSipCountForUser(sipStr, userID) {
+    if (!fs.existsSync(CONFIG.countedJsonPath)) {
+        return {
+            userID: userID,
+            count: "0",
+            sipStr: sipStr
+        }
+    }
     data = fs.readFileSync(CONFIG.countedJsonPath);
     var json = JSON.parse(data)
     user = json.find(obj => obj.userID == userID && obj.sipStr == sipStr);

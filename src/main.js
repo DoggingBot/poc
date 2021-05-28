@@ -63,7 +63,7 @@ client.on("message", async  (message) => {
 // =========================================================
 async function handleMsg(message) {
     //Handle some events with auth
-    if (countedStrings.includes(message.content.toLower())) {
+    if (CONFIG.countedStrings.includes(message.content.toLowerCase())) {
         //Handle command we don't need access for 
         command = require('./commands/sipCommand');
         command.injectConfig(CONFIG)
