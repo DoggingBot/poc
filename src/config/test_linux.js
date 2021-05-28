@@ -16,7 +16,7 @@ const defaultStaffChat = "801188002486812712";
 const writeMessageToDrunkTank = false;
 const warnAuthorizedUsage = false;
 const countedStrings = ['sip', 'burp'];
-const countedJsonPath = 'C:/t/sipcount.json';
+const countedJsonPath = 'sipcount.json';
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
