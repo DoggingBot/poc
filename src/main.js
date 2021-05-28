@@ -62,6 +62,19 @@ client.on("message", async  (message) => {
 // Handle a message & check if we need to execute a command 
 // =========================================================
 async function handleMsg(message) {
+    //Handle some events with auth
+    if (countedStrings.includes(message.content.toLower())) {
+        //Handle command we don't need access for 
+        command = require('./commands/sipCommand');
+        command.injectConfig(CONFIG)
+        return command.handle(message);
+    }
+    else if (message.content == ".sipstats") {
+        command = require('./commands/sipStatsCommand');
+        command.injectConfig(CONFIG)
+        return command.handle(message);
+    }
+
     // It will do nothing when the message doesnt start with the prefix
     if(!message.content.startsWith(CONFIG.commandPrefix)) return;
 

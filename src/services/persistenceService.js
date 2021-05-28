@@ -102,6 +102,46 @@ function getUser(userIdToGet) {
     return user;
 }
 
+
+function addSip(sipStr, userID) {
+    var obj = getSipCountForUser(sipStr, userID);
+    if (obj == undefined) {
+        obj = {
+            userID: "userID",
+            count: "1",
+            sipStr: sipStr
+        }
+    } else {
+        obj.count++;
+    }
+
+    if (!fs.existsSync(CONFIG.countedJsonPath)) {
+        fs.writeFileSync(CONFIG.countedJsonPath, JSON.stringify([obj]));
+    } else {
+        var data = fs.readFileSync(CONFIG.countedJsonPath);
+        var json = JSON.parse(data);
+        json.push(obj);
+        fs.writeFileSync(CONFIG.countedJsonPath, JSON.stringify(json));
+    }
+
+}
+
+function getAllSips() {
+    var data = fs.readFileSync(CONFIG.countedJsonPath);
+    var json = JSON.parse(data)
+    return json;
+}
+
+function getSipCountForUser(sipStr, userID) {
+    data = fs.readFileSync(CONFIG.countedJsonPath);
+    var json = JSON.parse(data)
+    user = json.find(obj => obj.userID == userID && obj.sipStr == sipStr);
+    return user;
+}
+
+exports.addSip = addSip;
+exports.getAllSips = getAllSips;
+exports.getSipCountForUser = getSipCountForUser;
 exports.getUser = getUser;
 exports.saveTanking = saveTanking;
 exports.getTankedUsers = getTankedUsers;

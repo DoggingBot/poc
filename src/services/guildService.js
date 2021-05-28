@@ -4,9 +4,8 @@ function injectGuild(guild) {
 }
 var CONFIG;
 
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 
