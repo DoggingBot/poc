@@ -15,6 +15,8 @@ const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944
 const defaultStaffChat = "753779129740034209";
 const writeMessageToDrunkTank = false;
 const warnAuthorizedUsage = false;
+const countedStrings = ['sip', 'burp'];
+const countedJsonPath = 'C:/t/sipcount.json';
 
 
 exports.drunktankRole = drunktankRole
@@ -32,3 +34,5 @@ exports.bypassGMU = bypassGMU
 exports.defaultStaffChat = defaultStaffChat
 exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
 exports.warnAuthorizedUsage = warnAuthorizedUsage;
+exports.countedStrings = countedStrings;
+exports.countedJsonPath = countedJsonPath;
