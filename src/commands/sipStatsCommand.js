@@ -10,17 +10,19 @@ async function handle(message) {
     var allSips = persistenceService.getAllSips();
 
     var msg = "";
-    CONFIG.countedStrings.forEach((sipStr) => {
-        var filteredArray = allSips.filter(x=> x.sipStr == sipStr);
-        var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
+    for (i = 0; i < CONFIG.countedStrings.length; i++) {
+         sipStr = CONFIG.countedStrings[i];
+         var filteredArray = allSips.filter(x=> x.sipStr == sipStr);
+         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
 
-        msg += "== " + sipStr + " Top 5 =="
-        await sortedArray.forEach( async (x)=> {
-            userObj = await guildService.getMemberForceLoad(x.userID);
-            msg += "\r\n" + userObj.nickname + " - " + x.count;
-        })
-        msg += "\r\n";
-    })
+         msg += "== " + sipStr + " Top 5 =="
+         for (n = 0; n <sortedArray.length; n++) {
+             x = sortedArray[n];
+             userObj = await guildService.getMemberForceLoad(x.userID);
+             msg += "\r\n" + userObj.nickname + " - " + x.count;
+         }
+         msg += "\r\n";
+    }
 
         
     message.channel.send(msg);
