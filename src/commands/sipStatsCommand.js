@@ -16,7 +16,7 @@ async function handle(message) {
 
         msg += "== " + sipStr + " Top 5 =="
         sortedArray.forEach((x)=> {
-            userObj = guildService.getMemberFromCache(x.userID);
+            userObj = guildService.getMemberForceLoad(x.userID);
             msg += "\r\n" + userObj.nickname + " - " + x.count;
         })
         msg += "\r\n";
