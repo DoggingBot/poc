@@ -1,6 +1,8 @@
 
 var persistenceService = require('../services/persistenceService');
 var guildService = require('../services/guildService');
+const HELPERS = require('../helpers/helpers');
+
 var CONFIG;
 function injectConfig(_cfg) {
     CONFIG = _cfg;
@@ -18,8 +20,15 @@ async function handle(message) {
          msg += "== " + sipStr + " Top 5 =="
          for (n = 0; n <sortedArray.length; n++) {
              x = sortedArray[n];
-             userObj = await guildService.getMemberForceLoad(x.userID);
-             msg += "\r\n" + userObj.nickname + " - " + x.count;
+             var str;
+             try { 
+                str = await guildService.getMemberForceLoad(x.userID);
+                str = str.nickname;
+             } 
+             catch {
+                 str = HELPERS.getAtString(x.userID);
+             }
+             msg += "\r\n" + str + " - " + x.count;
          }
          msg += "\r\n";
     }
