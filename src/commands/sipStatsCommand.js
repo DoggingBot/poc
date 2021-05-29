@@ -1,22 +1,23 @@
 
-const HELPERS = require('../helpers/helpers');
 var persistenceService = require('../services/persistenceService');
+var guildService = require('../services/guildService');
 var CONFIG;
 function injectConfig(_cfg) {
     CONFIG = _cfg;
 }
 
 async function handle(message) {
-    var userObj = persistenceService.getAllSips();
+    var allSips = persistenceService.getAllSips();
 
     var msg = "";
     CONFIG.countedStrings.forEach((sipStr) => {
-        var filteredArray = userObj.filter(x=> x.sipStr == sipStr);
+        var filteredArray = allSips.filter(x=> x.sipStr == sipStr);
         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
 
         msg += "== " + sipStr + " Top 5 =="
         sortedArray.forEach((x)=> {
-            msg += "\r\n" + HELPERS.getAtString(x.userID) + " - " + x.count;
+            userObj = guildService.getMemberFromCache(x.userID);
+            msg += "\r\n" + userObj.nickname + " - " + x.count;
         })
         msg += "\r\n";
     })
