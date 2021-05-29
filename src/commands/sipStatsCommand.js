@@ -15,7 +15,7 @@ async function handle(message) {
         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
 
         msg += "== " + sipStr + " Top 5 =="
-        sortedArray.forEach((x)=> {
+        await sortedArray.forEach( async (x)=> {
             userObj = await guildService.getMemberForceLoad(x.userID);
             msg += "\r\n" + userObj.nickname + " - " + x.count;
         })
