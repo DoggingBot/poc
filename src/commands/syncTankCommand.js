@@ -48,7 +48,7 @@ async function handle(message) {
     }
 
     toSaveTank.forEach((x)=> {
-        persistenceService.saveTanking(x, "Unknown", "Added by synctank command", config.tankDuration, config.tankDuration, []);
+        persistenceService.saveTanking(x, "Unknown", "Added by synctank command", CONFIG.tankDuration, CONFIG.tankDuration, []);
     });
 
     toSaveUntank.forEach((x)=> {

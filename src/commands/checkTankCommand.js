@@ -20,7 +20,7 @@ async function handle(message) {
         }
         var datediff = HELPERS.getDateDiffString(ts, obj.time_tanked);
         if (obj.tanked_by == "Unknown") {
-            msg = obj.user_tanked + " was not tanked by me. I learned about them " + datediff + " ago."; 
+            msg = HELPERS.getAtString(obj.user_tanked) + " was not tanked by me. I learned about them " + datediff + " ago."; 
         }
         else {
             msg = "(tanked " + datediff + " ago by " + obj.tanked_by + " for " + obj.reason + ")";
