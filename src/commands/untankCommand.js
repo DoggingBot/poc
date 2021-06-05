@@ -17,7 +17,7 @@ async function handle(message) {
     tokens = HELPERS.tokenize(msg.substr(1,msg.length -1 ));
         
     if (tokens.length < 1) {
-        message.channel.send("Invalid arguments. Correct usage: &&untank @user optionalreason");
+        message.channel.send("Invalid arguments. Correct usage: " + CONFIG.commandPrefix + "untank @user optionalreason");
         return;
     }
     var reason = HELPERS.getReason(tokens);
