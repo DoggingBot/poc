@@ -32,7 +32,8 @@ function saveTanking(userToTankId, authorNickname, reason, duration, uom, oldRol
         time_to_untank: untank_time,
         role_to_remove: CONFIG.drunktankRole,
         roles_to_give_back: oldRoles,
-        archive: false
+        archive: false,
+        historical_tank: false
     }
 
     if (!fs.existsSync(CONFIG.json_path)) {
@@ -69,6 +70,55 @@ function saveUntanking(userIdToUntank) {
 }
 
 /*
+Update a tanked user to say they've left (thus removing them from the checktank)
+*/
+function saveUserLeaving(userIdThatLeft) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data);
+
+    for (n=0;n<json.length; n++) {
+        if (json[n].archive) {
+            continue;   
+        }
+
+        //user matches and is a historical tank
+        if (json[n].user_tanked == userIdThatLeft) {
+
+            //mark this user as being in the tank historically
+            json[n].archive = true;
+            json[n].historical_tank = true;
+        }
+    }
+
+    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
+}
+
+/*
+Update a newly joined user to say they have rejoined (thus including them in checktank again)
+*/
+function saveUserJoining(userIdThatJoined) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data);
+    
+    for (n=0;n<json.length; n++) {
+        if (!json[n].historical_tank) {
+            continue;   
+        }
+
+        //user matches and is a historical tank
+        if (json[n].user_tanked == userIdThatJoined) {
+            //unarchive the first one & break
+            json[n].archive = false;
+            json[n].historical_tank = false;
+
+            break;
+        }
+    }
+
+    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
+}
+
+/*
 returns a json array of all currently tanked users
 */
 function getTankedUsers() {
@@ -102,7 +152,25 @@ function getUser(userIdToGet) {
     return user;
 }
 
+/*
+returns a json representation of a tanked user if there is one
+checks historical records too to see if theyve left whilst tanked
+*/
+function getUserHistorical(userIdToGet) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data)
+    user = json.find(obj => 
+        obj.archive == true 
+        && obj.historical_tank == true
+        && obj.user_tanked == userIdToGet
+    );
 
+    return user;
+}
+
+/*
+Add a sip to the sip json 
+*/
 function addSip(sipStr, userID) {
     var obj = getSipCountForUser(sipStr, userID);
     if (obj == undefined) {
@@ -139,12 +207,18 @@ function addSip(sipStr, userID) {
     return obj;
 }
 
+/*
+Return a list of all historical sips
+*/
 function getAllSips() {
     var data = fs.readFileSync(CONFIG.countedJsonPath);
     var json = JSON.parse(data)
     return json;
 }
 
+/*
+Return the sip count for an individual user
+*/
 function getSipCountForUser(sipStr, userID) {
     if (!fs.existsSync(CONFIG.countedJsonPath)) {
         return {
@@ -168,3 +242,6 @@ exports.getTankedUsers = getTankedUsers;
 exports.saveUntanking = saveUntanking;
 exports.injectConfig = injectConfig;
 exports.getTankHistory = getTankHistory;
+exports.getUserHistorical = getUserHistorical;
+exports.saveUserJoining = saveUserJoining;
+exports.saveUserLeaving = saveUserLeaving;
