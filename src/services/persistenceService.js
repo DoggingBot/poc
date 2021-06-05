@@ -69,6 +69,20 @@ function saveUntanking(userIdToUntank) {
 }
 
 /*
+Update a tanked user to say they've left (thus removing them from the checktank)
+*/
+async function saveUserLeaving(userIdThatLeft) {
+
+}
+
+/*
+Update a newly joined user to say they have rejoined (thus including them in checktank again)
+*/
+async function saveUserJoining(userIdThatJoined) {
+    
+}
+
+/*
 returns a json array of all currently tanked users
 */
 function getTankedUsers() {
@@ -98,11 +112,29 @@ returns a json representation of a tanked user if there is one
 function getUser(userIdToGet) {
     data = fs.readFileSync(CONFIG.json_path);
     var json = JSON.parse(data)
-    user = json.find(obj => obj.archive == false && obj.user_tanked == userIdToGet);
+    user = json.find(obj => obj.archive == false && obj.user_tanked == userIdToGet).first();
     return user;
 }
 
+/*
+returns a json representation of a tanked user if there is one
+checks historical records too to see if theyve left whilst tanked
+*/
+function getUserHistorical(userIdToGet) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data)
+    user = json.find(obj => 
+        obj.archive == true 
+        && obj.historical_tank == true
+        && obj.user_tanked == userIdToGet
+    ).first();
 
+    return user;
+}
+
+/*
+Add a sip to the sip json 
+*/
 function addSip(sipStr, userID) {
     var obj = getSipCountForUser(sipStr, userID);
     if (obj == undefined) {
@@ -139,12 +171,18 @@ function addSip(sipStr, userID) {
     return obj;
 }
 
+/*
+Return a list of all historical sips
+*/
 function getAllSips() {
     var data = fs.readFileSync(CONFIG.countedJsonPath);
     var json = JSON.parse(data)
     return json;
 }
 
+/*
+Return the sip count for an individual user
+*/
 function getSipCountForUser(sipStr, userID) {
     if (!fs.existsSync(CONFIG.countedJsonPath)) {
         return {
@@ -168,3 +206,6 @@ exports.getTankedUsers = getTankedUsers;
 exports.saveUntanking = saveUntanking;
 exports.injectConfig = injectConfig;
 exports.getTankHistory = getTankHistory;
+exports.getUserHistorical = getUserHistorical;
+exports.saveUserJoining = saveUserJoining;
+exports.saveUserLeaving = saveUserLeaving;
