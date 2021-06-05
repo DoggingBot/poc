@@ -1,9 +1,9 @@
 const BOT_VERSION = "1.1.0";
 
-var config ;
+var CONFIG;
 
 function injectConfig(myConfig) {
-    config = myConfig;
+    CONFIG = myConfig;
 }
 
 function getDateDiffString(future, past) {
@@ -33,14 +33,13 @@ function getReason(tokens) {
 }
 function validateReason(reason, message) {
     if (reason.replace(/[^A-Za-z0-9]/g, '') == "") {
-        message.channel.send("Invalid arguments. You must enter a reason. Correct usage: &&tank @user reason");
+        message.channel.send("Invalid arguments. You must enter a reason. Correct usage: " + CONFIG.commandPrefix + "tank @user reason");
         return false;
     }
     return true;
 }
 
 function validateMentions(message, command, prefix) {
-
     if (message.mentions.users.size == 0) {
         message.channel.send("Invalid arguments. You need to @ the user to drunk tank them. Correct usage: " + prefix + command + " @user reason");
         return false;
@@ -60,7 +59,7 @@ function tokenize(m) {
 
 function trimCommand(message) {
     let command = message.content.toLowerCase().split(" ")[0];
-    command = command.slice(config.commandPrefix.length);
+    command = command.slice(CONFIG.commandPrefix.length);
     return command;
 }
 
@@ -83,8 +82,8 @@ function doesUserHaveRole(userObj, roleId) {
 
 function parseDurationFromTokens(tokens) {
     // For finding the possible existence of a specified duration/UoM, we have to set the defaults first found in config. All references to the config defaults must be swapped over to these new local-scope variables.
-    var specifiedDuration = config.tankDuration; // "12"
-    var specifiedUOM = config.tankUOM; // "hours"
+    var specifiedDuration = CONFIG.tankDuration; // "12"
+    var specifiedUOM = CONFIG.tankUOM; // "hours"
     var mins = /^\d+m$/; // regex matches 1+ digits then an 'm' for minutes
     var hrs = /^\d+h$/; // regex matches 1+ digits then an 'h' for hours
     var days = /^\d+d$/; // regex matches 1+ digits then a 'd' for days
@@ -112,8 +111,6 @@ function parseDurationFromTokens(tokens) {
         duration: specifiedDuration,
         newTokens: tokens
     }
-  
-
 }
 
 function getAtString(userId) {

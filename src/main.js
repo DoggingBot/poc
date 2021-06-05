@@ -3,10 +3,12 @@
 // ==========================================================
 //Setup CONFIG file
 if (process.argv.length < 3) {
-    console.log("Please pass the CONFIG file as a parameter.");
-    return;
+    //Assume default config
+    configfile = "testcfg";
 }
-configfile = process.argv[2];
+else {
+    configfile = process.argv[2];
+}
 
 //instantiate all our services
 var guildService = require('./services/guildService.js');
