@@ -40,7 +40,6 @@ function validateReason(reason, message) {
 }
 
 function validateMentions(message, command, prefix) {
-
     if (message.mentions.users.size == 0) {
         message.channel.send("Invalid arguments. You need to @ the user to drunk tank them. Correct usage: " + prefix + command + " @user reason");
         return false;
@@ -112,8 +111,6 @@ function parseDurationFromTokens(tokens) {
         duration: specifiedDuration,
         newTokens: tokens
     }
-  
-
 }
 
 function getAtString(userId) {

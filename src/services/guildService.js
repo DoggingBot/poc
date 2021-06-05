@@ -60,7 +60,7 @@ async function getMemberForceLoad(userId) {
         id:  userObj.id,
         nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
         username:  userObj.user.username,
-        roles: userObj._roles//.map(role => role.id)
+        roles: userObj._roles
     }
 }
 
@@ -72,22 +72,21 @@ async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
 
     var byBot = false;
 
-
-    return auditlog.entries.forEach((key, value) => {
+    for (let [key, value] of auditlog.entries) {
         if (value == undefined) {
-            return;
+            continue;
         }
         if (value.changes == undefined) {
-            return;
+            continue;
         }
         if (value.changes[0]["new"] == undefined) {
-            return;
+            continue;
         }
     
         var authorId = value.executor.id;
         if (CONFIG.bypassGMU.includes(authorId)) {
             byBot=true;
-            return;
+            continue;
         }
 
         if (value.changes[0]["new"][0].id === roleId && value.target == targetMemberId) {
@@ -97,18 +96,14 @@ async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
                 actionRequired: true
             });
         }
-    }).then((promise) => {
-        if (promise == undefined) {
-            if (byBot) {
-                LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. Looks like it might have been one of the bots.");
-            }
-            else {
-                LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. This is bad.");
-            }
-            return Promise.reject();
-        }
-        return promise;
-    });
+    }
+    if (byBot) {
+        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. Looks like it might have been one of the bots.");
+    }
+    else {
+        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. This is bad.");
+    }
+    return Promise.reject();
 }
 
 exports.getExecutorForRoleChangeFromAuditLog = getExecutorForRoleChangeFromAuditLog;
