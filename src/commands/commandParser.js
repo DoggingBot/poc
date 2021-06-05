@@ -57,7 +57,7 @@ async function parseCommand(message) {
             command = require('./tankStatsCommand');
             break;  
         case "synctank":
-            command = require('.    /syncTankCommand');
+            command = require('./syncTankCommand');
             break;  
         default:
             if (CONFIG.warnAuthorizedUsage)

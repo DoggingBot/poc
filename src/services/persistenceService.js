@@ -32,7 +32,8 @@ function saveTanking(userToTankId, authorNickname, reason, duration, uom, oldRol
         time_to_untank: untank_time,
         role_to_remove: CONFIG.drunktankRole,
         roles_to_give_back: oldRoles,
-        archive: false
+        archive: false,
+        historical_tank: false
     }
 
     if (!fs.existsSync(CONFIG.json_path)) {
@@ -71,15 +72,50 @@ function saveUntanking(userIdToUntank) {
 /*
 Update a tanked user to say they've left (thus removing them from the checktank)
 */
-async function saveUserLeaving(userIdThatLeft) {
+function saveUserLeaving(userIdThatLeft) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data);
 
+    for (n=0;n<json.length; n++) {
+        if (json[n].archive) {
+            continue;   
+        }
+
+        //user matches and is a historical tank
+        if (json[n].user_tanked == userIdThatLeft) {
+
+            //mark this user as being in the tank historically
+            json[n].archive = true;
+            json[n].historical_tank = true;
+        }
+    }
+
+    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
 }
 
 /*
 Update a newly joined user to say they have rejoined (thus including them in checktank again)
 */
-async function saveUserJoining(userIdThatJoined) {
+function saveUserJoining(userIdThatJoined) {
+    data = fs.readFileSync(CONFIG.json_path);
+    var json = JSON.parse(data);
     
+    for (n=0;n<json.length; n++) {
+        if (!json[n].historical_tank) {
+            continue;   
+        }
+
+        //user matches and is a historical tank
+        if (json[n].user_tanked == userIdThatJoined) {
+            //unarchive the first one & break
+            json[n].archive = false;
+            json[n].historical_tank = false;
+
+            break;
+        }
+    }
+
+    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
 }
 
 /*
@@ -112,7 +148,7 @@ returns a json representation of a tanked user if there is one
 function getUser(userIdToGet) {
     data = fs.readFileSync(CONFIG.json_path);
     var json = JSON.parse(data)
-    user = json.find(obj => obj.archive == false && obj.user_tanked == userIdToGet).first();
+    user = json.find(obj => obj.archive == false && obj.user_tanked == userIdToGet);
     return user;
 }
 
@@ -127,7 +163,7 @@ function getUserHistorical(userIdToGet) {
         obj.archive == true 
         && obj.historical_tank == true
         && obj.user_tanked == userIdToGet
-    ).first();
+    );
 
     return user;
 }

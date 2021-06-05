@@ -26,10 +26,8 @@ async function handle(newMember) {
     }
 
     //Update our records, then sync the tank 
-    return persistenceService.saveUserJoined(newMember.id)
-        .then(() => {
-            return syncTankService.syncTank();
-        });
+    persistenceService.saveUserJoining(newMember.id)
+    return syncTankService.syncTank();
 }
 
 exports.handle = handle;
