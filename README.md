@@ -20,6 +20,8 @@ Behaviour:
 The Bot will react to the following events:
 * a member is given the drunktankRole
 * a member has the drunktankRole taken away
+* a member joining - if they have been drunk tanked in the past, it will update the state so their are reflected as tanked in .checktank. NB: This will NOT grant the role back itself, it expects a Role Persistence bot to do this for us. Role persistence may be incorporated at a later date.
+* a member leaving - it will mark the member as archived but still tanked, so they do not appear in checktank whilst they are not a member of the server.
 
 The Bot will respond to the following commands:
 * .tank - drunk tanks a user. usage: .tank @user reason.
@@ -27,12 +29,12 @@ The Bot will respond to the following commands:
 * .untank - Untank a user. usage: .untank @user reason.
 * .tankstats - Stats for fun. 
 * .synctank - sync up the 2drunk2party role with the Bot tank log. 
+* .sipstats - List the stats of all the counted strings
 * .help - Sends this help message
 
 When a user is tanked, the bot will automatically remove all of their other roles (provided it has permissions to). It will re-grant these roles when a user is untanked. This will work either via the commands or the handled events.
 
-Options:
-
+Config:
 * drunktankRole = Role ID for the role that locks a user out of the other channels
 * tankChannel = Channel ID for the drunk-tank channel to message the tankee
 * logChannel = Channel ID to log tank events to.
@@ -47,26 +49,10 @@ Options:
 * defaultStaffChat = channel id of the staff channel. Not used at present.
 * writeMessageToDrunkTank = True to message the drunk tank channel telling the user why, false if not.
 * warnAuthorizedUsage = True to warn users for trying to command it with authorization, false if not.
+* countedStrings = a list of strings that when the bot detects them as a message, keeps a count of the times the user has said the phrase
+* countedJsonPath = Path to a local JSON file for the string counts (sips)
 
 NB: Be careful with your access key. Keep it out of source control. I keep mine in .env and have it gitignored.
-
-
-TODO LIST (Features)
-- Disconnect users from any voice channels on tanking
-- Auto untank after time served (controversial)
-- Improve reporting - expand tankstats to allow profiling individual users ie .checkuser @user could return all the times they were tanked and the reasons etc
-- Last warning system - mark a user as on their last warning and auto-ban on next tank
-- Improve user access control to enable granular access to commands rather than all or nothing
-
-TODO LIST (architecture)
-- Add a database backend instead of a json file
-- Containerize
-- Unit tests
-- Archival of old tankings
-
-LONG TERM
-- Genericise so it can work on > 1 server with a single instance
-- Make the config easier (either through a UI, or use role names or whatever instead)
 
 # License 
 
