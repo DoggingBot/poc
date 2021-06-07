@@ -15,7 +15,7 @@ async function handle(message) {
     for (i = 0; i < CONFIG.countedStrings.length; i++) {
          sipStr = CONFIG.countedStrings[i];
          var filteredArray = allSips.filter(x=> x.sipStr == sipStr);
-         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
+         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);
 
          msg += "== " + sipStr + " Top 5 =="
          for (n = 0; n <sortedArray.length; n++) {

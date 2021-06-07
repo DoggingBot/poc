@@ -16,8 +16,8 @@ function log_blue_tank_msg(authorNickname, tankTaggedString, tankedUsername, tan
     "\r\Tag: " + tankTaggedString +
     "\r\nUsername: " + tankedUsername +
     "\r\nId: " + tankedUserID +
-    "\r\nDrunk tanked by " + authorNickname + 
-    "\r\nReason: " + reason
+    "\r\nDrunk tanked by " + authorNickname +
+    reason != undefined ? "\r\nReason: " + reason : "";
 }
 function log_blue_untank_msg(authorNickname, tankTaggedString, tankedUsername, tankedUserID, datediff) {
     return "=== UNTANKED ===" +

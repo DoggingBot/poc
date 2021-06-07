@@ -31,33 +31,33 @@ async function handle(oldMember, newMember) {
         return;
     }
 
-    var responseObj = await guildService.getExecutorForRoleChangeFromAuditLog(CONFIG.drunktankRole, oldMember.id);
-
-    //We found the audit entry for this event, lets now check if the 2Drunk2Party was removed
-    if (responseObj.actionRequired) {
-        tankedUserId = newMember.user.id;
-        authorId = responseObj.authorId;
-        reason = "Manual Tanking";
-        duration = CONFIG.tankDuration;
-        uom = CONFIG.tankUOM;
-        auditAction = responseObj.auditAction;
-
-		// Drunktank Role is involved in this audit log for the affected user, and not done by a bypassing User.
-		if (oldRoles.includes(CONFIG.drunktankRole) && 
-            !newRoles.includes(CONFIG.drunktankRole) &&
-		    auditAction === "$remove") {
-			//Looks like 2Drunk2Party was removed
-            tankedUserJson = persistenceService.getUser(tankedUserId); 
-			return drunkTankService.untankUser(tankedUserId, authorId, tankedUserJson);
-
-		} 
-        if (!oldRoles.includes(CONFIG.drunktankRole) && 
-            newRoles.includes(CONFIG.drunktankRole) && 
-		    auditAction === "$add")	{
-			//Looks like 2Drunk2Party was added 
-            return drunkTankService.tankUser(tankedUserId, authorId, reason, duration, uom);
-		}
-    }
+    guildService.getExecutorForRoleChangeFromAuditLog(CONFIG.drunktankRole, oldMember.id)
+        .then((responseObj) => {
+            tankedUserId = newMember.user.id;
+            authorId = responseObj.authorId;
+            duration = CONFIG.tankDuration;
+            uom = CONFIG.tankUOM;
+            auditAction = responseObj.auditAction;
+    
+            // Drunktank Role is involved in this audit log for the affected user, and not done by a bypassing User.
+            if (oldRoles.includes(CONFIG.drunktankRole) && 
+                !newRoles.includes(CONFIG.drunktankRole) &&
+                auditAction === "$remove") {
+                //Looks like 2Drunk2Party was removed
+                tankedUserJson = persistenceService.getUser(tankedUserId); 
+                return drunkTankService.untankUser(tankedUserId, authorId, tankedUserJson);
+    
+            } 
+            if (!oldRoles.includes(CONFIG.drunktankRole) && 
+                newRoles.includes(CONFIG.drunktankRole) && 
+                auditAction === "$add")	{
+                //Looks like 2Drunk2Party was added 
+                return drunkTankService.tankUser(tankedUserId, authorId, reason, duration, uom);
+            }
+        })
+        .catch(() => {
+            LOGGER.log("2Drunk2Party was added or removed but we couldn't find the audit log.");
+        });
 }
 
 exports.handle = handle;

@@ -12,6 +12,9 @@ configfile = process.argv[2];
 var guildService = require('./services/guildService.js');
 var persistenceService = require('./services/persistenceService');
 var drunkTankService = require('./services/drunktankService');
+var tankStatsService = require('./services/tankStatsService');
+var syncTankService = require('./services/syncTankService');
+var commandParser = require('./commands/commandParser');
 
 //Pull in our functional objects as constants
 const CONFIG = require('./config/' + configfile);
@@ -21,6 +24,10 @@ const HELPERS = require('./helpers/helpers');
 drunkTankService.injectConfig(CONFIG, guildService);
 persistenceService.injectConfig(CONFIG);
 guildService.injectConfig(CONFIG);
+commandParser.injectConfig(CONFIG);
+syncTankService.injectConfig(CONFIG);
+tankStatsService.injectConfig(CONFIG);
+
 HELPERS.injectConfig(CONFIG);
 
 //Log into our discord client
@@ -42,6 +49,7 @@ client.on("ready", () => {
     console.log(CONFIG.bot_name + " successfully started.");
 });
 
+//When an existing member is changed on the server
 client.on("guildMemberUpdate", async (o,n) => {
     guildService.injectGuild(o.guild);
 

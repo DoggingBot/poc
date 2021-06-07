@@ -13,7 +13,7 @@ async function handle(message) {
     var userObj = persistenceService.addSip(action, userId);
 
     var msgString = HELPERS.getAtString(userObj.userID) + 
-        " has enjoyed " + userObj.count + " total " + userObj.sipStr + "'s";
+        " has enjoyed " + userObj.count + " " + userObj.sipStr + "'s";
 
     message.channel.send(msgString);
 }
