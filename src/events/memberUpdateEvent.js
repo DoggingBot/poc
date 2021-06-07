@@ -39,6 +39,7 @@ async function handle(oldMember, newMember) {
             duration = CONFIG.tankDuration;
             uom = CONFIG.tankUOM;
             auditAction = responseObj.auditAction;
+            reason = "";
     
             // Drunktank Role is involved in this audit log for the affected user, and not done by a bypassing User.
             if (oldRoles.includes(CONFIG.drunktankRole) && 
@@ -56,7 +57,8 @@ async function handle(oldMember, newMember) {
                 return drunkTankService.tankUser(tankedUserId, authorId, reason, duration, uom);
             }
         })
-        .catch(() => {
+        .catch((ex) => {
+            LOGGER.log("exception: " + ex);
             LOGGER.log("2Drunk2Party was added or removed but we couldn't find the audit log.");
         });
 }

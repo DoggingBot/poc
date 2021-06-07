@@ -11,13 +11,14 @@ function confirm_untank_message(authorNickname, tankTaggedString, reason, rolesG
     "\r\nWith Reason: " + reason +
     "\r\nI have removed 2Drunk2Party, and returned their original roles: " + rolesGivenBack;
 }
-function log_blue_tank_msg(authorNickname, tankTaggedString, tankedUsername, tankedUserID, reason) {
+function log_blue_tank_msg(authorNickname, tankTaggedString, tankedUsername, tankedUserID, reason, disconnectedFromVc) {
     return "=== DRUNK TANKED ===" +
     "\r\Tag: " + tankTaggedString +
     "\r\nUsername: " + tankedUsername +
     "\r\nId: " + tankedUserID +
     "\r\nDrunk tanked by " + authorNickname +
-    reason != undefined ? "\r\nReason: " + reason : "";
+    (disconnectedFromVc ? "\r\nI disconnected the member from VC" : "") +
+    (reason != "" ? "\r\nReason: " + reason : "");
 }
 function log_blue_untank_msg(authorNickname, tankTaggedString, tankedUsername, tankedUserID, datediff) {
     return "=== UNTANKED ===" +
