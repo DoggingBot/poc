@@ -21,7 +21,7 @@ async function handle(message) {
 
     //Validate token length
     if (tokens.length < 2) {
-        message.channel.send("Invalid arguments. Correct usage: &&tank @user reason");
+        message.channel.send("Invalid arguments. Correct usage: " + CONFIG.commandPrefix + "tank @user reason");
         return;
     }
 

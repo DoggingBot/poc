@@ -8,6 +8,7 @@ function injectConfig(_cfg) {
     CONFIG = _cfg;
 }
 
+const LOGGER = require('../helpers/logger');
 
 async function writeToChannel(channelId, message) {
     var channel = TheGuild.channels.cache.get(channelId);
@@ -59,52 +60,50 @@ async function getMemberForceLoad(userId) {
         id:  userObj.id,
         nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
         username:  userObj.user.username,
-        roles: userObj._roles//.map(role => role.id)
+        roles: userObj._roles
     }
 }
 
 async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
     var auditlog = await TheGuild.fetchAuditLogs({
-		limit: 1,
+		limit: 5,
 		type: 'MEMBER_UPDATE_ROLES'
 	});
 
-    var topOne = auditlog.entries.first();
-    if (topOne == undefined) {
-        return Promise.resolve({
-            actionRequired: false
-        });
-    }
-    if (topOne.changes == undefined) {
-        console.log("Handled event with no audit log changes");
-        return Promise.resolve({
-            actionRequired: false
-        });
-    }
-    if (topOne.changes[0]["new"] == undefined) {
-        console.log("Handled event with no audit log NEW changes");
-        return Promise.resolve({
-            actionRequired: false
-        });
-    }
+    var byBot = false;
 
-    var authorId = topOne.executor.id;
+    for (let [key, value] of auditlog.entries) {
+        if (value == undefined) {
+            continue;
+        }
+        if (value.changes == undefined) {
+            continue;
+        }
+        if (value.changes[0]["new"] == undefined) {
+            continue;
+        }
+    
+        var authorId = value.executor.id;
+        if (CONFIG.bypassGMU.includes(authorId)) {
+            byBot=true;
+            continue;
+        }
 
-    if (CONFIG.bypassGMU.includes(authorId)) {
-        console.log("Handled event performed by the ignored configuration list");
-        return Promise.resolve({
-            actionRequired: false
-        });
+        if (value.changes[0]["new"][0].id === roleId && value.target == targetMemberId) {
+            return Promise.resolve({
+                authorId: authorId,
+                auditAction: value.changes[0].key,
+                actionRequired: true
+            });
+        }
     }
-
-    //The audit entry represents the role and user
-    if (topOne.changes[0]["new"][0].id === roleId && topOne.target == targetMemberId) {
-        return Promise.resolve({
-            authorId: authorId,
-            auditAction: topOne.changes[0].key,
-            actionRequired: true
-        });
+    if (byBot) {
+        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. Looks like it might have been one of the bots.");
     }
+    else {
+        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. This is bad.");
+    }
+    return Promise.reject();
 }
 
 exports.getExecutorForRoleChangeFromAuditLog = getExecutorForRoleChangeFromAuditLog;

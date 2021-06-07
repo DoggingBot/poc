@@ -1,8 +1,6 @@
 var persistenceService = require('./persistenceService');
 var guildService = require('./guildService');
 
-const HELPERS = require('../helpers/helpers');
-
 var CONFIG;
 
 function injectConfig(myConfig) {

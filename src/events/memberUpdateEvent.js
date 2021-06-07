@@ -5,6 +5,7 @@ var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 const MESSAGES = require('../helpers/messages');
+const LOGGER = require('../helpers/logger');
 
 var CONFIG;
 function injectConfig(_cfg) {
@@ -20,14 +21,14 @@ async function handle(oldMember, newMember) {
 	var oldRoles = oldMember._roles;
 	var newRoles = newMember._roles;
     //check if the roles have changed
-    if (JSON.stringify(oldRoles) == JSON.stringify(newRoles)) {
-        console.log("Handled event with no role changes");
+    if (JSON.stringify(oldRoles) === JSON.stringify(newRoles)) {
+        LOGGER.log("Handled event with no role changes");
         return;
     }
 
     //ensure any role changes involves 2drunk2party
     if (!(oldRoles.includes(CONFIG.drunktankRole) || newRoles.includes(CONFIG.drunktankRole))) {
-        console.log("Handled role change event that didn't involve 2drunk2party.");
+        LOGGER.log("Handled role change event that didn't involve 2drunk2party.");
         return;
     }
 

@@ -1,14 +1,15 @@
 var persistenceService = require('./persistenceService');
 var guildService = require('./guildService');
 
-var HELPERS = require('../helpers/helpers');
-var MESSAGES = require('../helpers/messages');
+const HELPERS = require('../helpers/helpers');
+const MESSAGES = require('../helpers/messages');
+const LOGGER = require('../helpers/logger');
+
 
 var CONFIG;
 
-function injectConfig(_cfg, guildSvc) {
+function injectConfig(_cfg) {
     CONFIG = _cfg;
-    guildService = guildSvc;
 }
 
 /*
@@ -26,7 +27,7 @@ async function tankUser(userToTankId, authorId, reason, duration, uom) {
     var authorObj = guildService.getMemberFromCache(authorId);
 
 
-    console.log("Drunk tanking " + userToTankObj.nickname + " -- initiated by " + authorObj.nickname);
+    LOGGER.log("Drunk tanking " + userToTankObj.nickname + " -- initiated by " + authorObj.nickname);
   
     try {
         var rolesToTakeAway = await HELPERS.convertRoleIdArrayToRoleNameArray(userToTankObj.roles, guildService);
