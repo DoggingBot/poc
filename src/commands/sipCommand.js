@@ -9,8 +9,9 @@ function injectConfig(_cfg) {
 async function handle(message) {
     var action = message.content.toLowerCase();
     var userId = message.author.id;
+    var nickname = message.author.username;
 
-    var userObj = persistenceService.addSip(action, userId);
+    var userObj = persistenceService.addSip(action, userId, nickname);
 
     var msgString = HELPERS.getAtString(userObj.userID) + 
         " has enjoyed " + userObj.count + " " + userObj.sipStr + "'s";

@@ -25,9 +25,13 @@ async function handle(newMember) {
         return;
     }
 
-    //Update our records, then sync the tank 
-    persistenceService.saveUserJoining(newMember.id)
-    return syncTankService.syncTank();
+    //Update our records 
+    persistenceService.saveUserJoining(newMember.id);
+
+    //Sync the tank after 10 seconds to give the role persistence bot some time to catch up
+    return setTimeout(() => {
+        return syncTankService.syncTank();
+    }, 10000);
 }
 
 exports.handle = handle;

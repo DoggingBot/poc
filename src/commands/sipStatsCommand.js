@@ -22,7 +22,7 @@ async function handle(message) {
              x = sortedArray[n];
              var str;
              try { 
-                str = await guildService.getMemberForceLoad(x.userID);
+                str = await guildService.getMemberFromCache(x.userID);
                 str = str.nickname;
              } 
              catch {
@@ -30,12 +30,11 @@ async function handle(message) {
              }
              msg += "\r\n" + str + " - " + x.count;
          }
-         msg += "\r\n";
-         msg += "\r\n";
+         message.channel.send(msg);
     }
 
         
-    message.channel.send(msg);
+   
 }
 
 exports.handle = handle;

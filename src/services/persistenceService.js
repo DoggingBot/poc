@@ -171,16 +171,23 @@ function getUserHistorical(userIdToGet) {
 /*
 Add a sip to the sip json 
 */
-function addSip(sipStr, userID) {
+function addSip(sipStr, userID, nickname) {
     var obj = getSipCountForUser(sipStr, userID);
     if (obj == undefined) {
         obj = {
             userID: userID,
             count: "1",
+            nickname: nickname,
             sipStr: sipStr
         }
     } else {
-        obj.count++;
+        obj = {
+            userID: userID,
+            count: obj.count + 1,
+            nickname: nickname,
+            sipStr: sipStr
+        }
+        
     }
 
     if (!fs.existsSync(CONFIG.countedJsonPath)) {
@@ -195,6 +202,7 @@ function addSip(sipStr, userID) {
             if (x.userID == obj.userID && x.sipStr == obj.sipStr) {
                 x.count = obj.count;
                 toAdd = false;
+                break;
             }
         }
 
