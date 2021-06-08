@@ -15,14 +15,14 @@ async function handle(message) {
     for (i = 0; i < CONFIG.countedStrings.length; i++) {
          sipStr = CONFIG.countedStrings[i];
          var filteredArray = allSips.filter(x=> x.sipStr == sipStr);
-         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);;
+         var sortedArray = filteredArray.sort((a,b) => { return  b.count - a.count }).slice(0,5);
 
          msg += "== " + sipStr + " Top 5 =="
          for (n = 0; n <sortedArray.length; n++) {
              x = sortedArray[n];
              var str;
              try { 
-                str = await guildService.getMemberForceLoad(x.userID);
+                str = await guildService.getMemberFromCache(x.userID);
                 str = str.nickname;
              } 
              catch {
@@ -30,12 +30,11 @@ async function handle(message) {
              }
              msg += "\r\n" + str + " - " + x.count;
          }
-         msg += "\r\n";
-         msg += "\r\n";
+         message.channel.send(msg);
     }
 
         
-    message.channel.send(msg);
+   
 }
 
 exports.handle = handle;

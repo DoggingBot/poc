@@ -47,8 +47,6 @@ async function setRolesForMember(userId, roles) {
 }
 
 async function getMemberForceLoad(userId) {
-   
-
     fetchObj = {
         user: userId,
         cache: false,
@@ -106,6 +104,29 @@ async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
     return Promise.reject();
 }
 
+async function disconnectMemberFromVC(userId) {
+    fetchObj = {
+        user: userId,
+        cache: false,
+        force: true
+    };
+    userObj = await TheGuild.members.fetch(fetchObj);
+
+    try {
+        if (userObj.voice != undefined) {
+            if (userObj.voice.channel != undefined) {
+                await userObj.voice.kick();
+                return true;
+            }
+        }
+    }
+    catch {
+        return false;
+    }
+    return false;
+}
+
+exports.disconnectMemberFromVC = disconnectMemberFromVC;
 exports.getExecutorForRoleChangeFromAuditLog = getExecutorForRoleChangeFromAuditLog;
 exports.getRole = getRole;
 exports.setRolesForMember = setRolesForMember;

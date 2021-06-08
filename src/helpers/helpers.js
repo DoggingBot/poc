@@ -142,6 +142,13 @@ async function convertRoleIdArrayToRoleNameArray(rolesToConvert, guildService) {
     return retval;
 }
 
+function getTopFive(stats) {
+    var top5 = [];
+    stats.sort((a,b) => { return  b.count - a.count }).slice(0,5);
+    return top5;
+}
+
+exports.getTopFive = getTopFive;
 exports.convertRoleIdArrayToRoleNameArray = convertRoleIdArrayToRoleNameArray;
 exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;

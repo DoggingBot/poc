@@ -23,7 +23,8 @@ async function handle(message) {
             msg = HELPERS.getAtString(obj.user_tanked) + " was not tanked by me. I learned about them " + datediff + " ago."; 
         }
         else {
-            msg = "(tanked " + datediff + " ago by " + obj.tanked_by + " for " + obj.reason + ")";
+            msg = "(tanked " + datediff + " ago by " + obj.tanked_by 
+                + (obj.reason != "" ? " for " + obj.reason + ")" : ")");
             if (ts > obj.time_to_untank) {
                 msg = HELPERS.getAtString(obj.user_tanked) + " has served their time. " + msg; 
             }

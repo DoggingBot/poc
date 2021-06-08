@@ -35,13 +35,16 @@ async function tankUser(userToTankId, authorId, reason, duration, uom) {
         //Set the roles
         await guildService.setRolesForMember(userToTankId, [CONFIG.drunktankRole]);
 
+        var memberDisconnected = await guildService.disconnectMemberFromVC(userToTankId);
+
         //Construct the blue log message
         msg = MESSAGES.log_blue_tank_msg(
             authorObj.nickname, 
             HELPERS.getAtString(userToTankId), 
             userToTankObj.username, 
             userToTankObj.id, 
-            reason
+            reason,
+            memberDisconnected
         );
         
         //Write the log message to the blue log channel
@@ -97,16 +100,20 @@ async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
 
     //make sure we don't accidently give back the 2drunk2party role
     var rolesToGiveBack = [];
+    var datediff = "";
+
     if (untankedMemberJson != undefined) {
         rolesToGiveBack = HELPERS.removeRoleFromArray(untankedMemberJson.roles_to_give_back, CONFIG.drunktankRole);
+
+        //Build a string that describes how long this person was tanked
+        let ts = Date.now();
+        datediff = HELPERS.getDateDiffString(ts, untankedMemberJson.time_tanked);
+    } else {
+        datediff = "unknown"
     }
     
     //Convert the role ID's to strings for readable output
     var rolesToGiveBackStr = await HELPERS.convertRoleIdArrayToRoleNameArray(rolesToGiveBack, guildService);
-
-    //Build a string that describes how long this person was tanked
-    let ts = Date.now();
-    var datediff = HELPERS.getDateDiffString(ts, untankedMemberJson.time_tanked);
 
     try {
         await guildService.setRolesForMember(untankedMemberId, rolesToGiveBack);
