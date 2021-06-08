@@ -30,7 +30,9 @@ async function handle(message) {
              }
              msg += "\r\n" + str + " - " + x.count;
          }
+         msg += "\r\n";
          message.channel.send(msg);
+         msg = "";
     }
 
         
