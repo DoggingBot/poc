@@ -29,6 +29,9 @@ async function handle(message) {
                  str = HELPERS.getAtString(x.userID);
              }
              msg += "\r\n" + str + " - " + x.count;
+             if (x.count % 69 == 0 || x.count % 420 == 0) {
+                 msg += ". Nice.";
+             }
          }
          msg += "\r\n";
          message.channel.send(msg);

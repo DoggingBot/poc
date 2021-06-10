@@ -15,6 +15,10 @@ async function handle(message) {
 
     var msgString = HELPERS.getAtString(userObj.userID) + 
         " has enjoyed " + userObj.count + " " + userObj.sipStr + "'s";
+    
+    if (userObj.count % 69 == 0 || userObj.count % 420 == 0) {
+        msgString += ". Nice.";
+    }
 
     message.channel.send(msgString);
 }
