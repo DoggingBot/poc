@@ -17,7 +17,10 @@ const writeMessageToDrunkTank = false;
 const warnAuthorizedUsage = false;
 const countedStrings = ['sip', 'burp', 'fart','vomit'];
 const countedJsonPath = 'sipcount.json';
-
+const useDatabase = false;
+const drunkTankCollection = "drunk-tank";
+const sipCollection = "sips";
+const databaseName = "tcprod"
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel
@@ -36,3 +39,7 @@ exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
 exports.warnAuthorizedUsage = warnAuthorizedUsage;
 exports.countedStrings = countedStrings;
 exports.countedJsonPath = countedJsonPath;
+exports.useDatabase = useDatabase;
+exports.drunkTankCollection = drunkTankCollection;
+exports.sipCollection = sipCollection;
+exports.databaseName = databaseName;

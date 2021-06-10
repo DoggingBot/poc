@@ -32,6 +32,12 @@ tankStatsService.injectConfig(CONFIG);
 
 HELPERS.injectConfig(CONFIG);
 
+var databasePersistence = require('./services/databasePersistenceService');
+if (CONFIG.useDatabase) {
+    databasePersistence.init(process.env.mongo_connnection_string);
+    databasePersistence.injectConfig(CONFIG);
+}
+
 //Log into our discord client
 const Discord = require("discord.js");
 const client  = new Discord.Client({

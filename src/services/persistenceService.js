@@ -1,4 +1,5 @@
 var fs = require('fs');
+var databasePersistenceService = require('./databasePersistenceService');
 var CONFIG;
 
 function injectConfig(myConfig) {
@@ -36,6 +37,10 @@ function saveTanking(userToTankId, authorNickname, reason, duration, uom, oldRol
         historical_tank: false
     }
 
+    if (CONFIG.useDatabase) {
+        databasePersistenceService.putTankedUser(tankee_obj);
+    }
+
     if (!fs.existsSync(CONFIG.json_path)) {
         fs.writeFileSync(CONFIG.json_path, JSON.stringify([tankee_obj]));
     }
@@ -62,6 +67,19 @@ function saveUntanking(userIdToUntank) {
             json[n].archive = true;
             user = json[n];
         }
+    }
+
+    if (CONFIG.useDatabase) {
+        databasePersistenceService.getTankedUser(userIdToUntank)
+            .then(async (tankRecords) => {
+                await tankRecords.forEach((tankRecord) => {
+                    tankRecord.archive = true;
+                });
+                return tankRecords;
+            })
+            .then((updatedTankRecords) => {
+                return databasePersistenceService.putUpdatedRecords(updatedTankRecords);
+            });
     }
 
     fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
