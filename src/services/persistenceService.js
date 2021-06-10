@@ -176,7 +176,7 @@ function addSip(sipStr, userID, nickname) {
     if (obj == undefined) {
         obj = {
             userID: userID,
-            count: "1",
+            count: 1,
             nickname: nickname,
             sipStr: sipStr
         }
