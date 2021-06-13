@@ -20,7 +20,7 @@ async function handle(message) {
         msgString += ". Nice.";
     }
 
-    if (userObj.count == 100) {
+    if (userObj.count === 100) {
         msg = "100 sips is a proud moment for any pisshead. Sir pisshead of sip, I hereby grant you one sipcoin and all the rights and lands associated with the title. Twizzle may not be the first, but he Flushed all the Jacksons in his way, and is thus the first owner of a sipcoin."
     }
 
