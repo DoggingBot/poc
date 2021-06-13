@@ -14,18 +14,21 @@ async function handle(message) {
     var userObj = persistenceService.addSip(action, userId, nickname);
 
     var msgString = HELPERS.getAtString(userObj.userID) + 
-        " has enjoyed " + userObj.count + " " + userObj.sipStr + "'s";
+        " has enjoyed " + userObj.count + " " + userObj.sipStr + "s";
 
-    if (userObj.userID == "551286839894605835") {
-        msgString += ". BABY YOU'RE A FIRE WORK, COME ON LET YOUR COLOURS BURST. "
-    }
-    
     if (userObj.count % 69 == 0 || userObj.count % 420 == 0) {
         msgString += ". Nice.";
     }
-
-    if (userObj.count === 100) {
-        msgString = "100 sips is a proud moment for any pisshead. Sir pisshead of sip, I hereby grant you one sipcoin and all the rights and lands associated with the title. Twizzle may not be the first, but he Flushed all the Jacksons in his way, and is thus the first owner of a sipcoin."
+    else {
+        if (userObj.count == 100) {
+            msgString = "100 " +userObj.sipStr +"s is a proud moment for any pisshead. ";
+        }
+        else {
+            if (Math.floor((Math.random() * 100) + 1) == 50) {
+                //make one in every 100 say something else
+                msgString = "You take a sip from your trusty vault 13 canteen.";
+            }
+        }
     }
 
     message.channel.send(msgString);
