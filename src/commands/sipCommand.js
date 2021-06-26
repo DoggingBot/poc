@@ -19,6 +19,11 @@ async function handle(message) {
     if (userObj.count % 69 == 0 || userObj.count % 420 == 0) {
         msgString += ". Nice.";
     }
+
+    if (userObj.count == 42) {
+        msgString = "Sipping 42 sips is the answer to the ultimate Question of life, the universe, and everything"
+    }
+
     else {
         if (userObj.count == 100) {
             msgString = "100 " +userObj.sipStr +"s is a proud moment for any pisshead. ";
