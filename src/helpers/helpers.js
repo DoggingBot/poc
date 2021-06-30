@@ -7,15 +7,15 @@ function injectConfig(myConfig) {
 }
 var moment = require('moment');
 
-function getDateDiffStringUsingMoment(future, past) {
+function getDateDiffString(future, past) {
     var mPast = moment(past);
     var mFuture = moment(future);
 
-    hours = mPast.diff(mFuture, 'hours', true)
-    roundedHours = mPast.diff(mFuture, 'hours', false);
+    hours = mFuture.diff(mPast, 'hours', true)
+    roundedHours = mFuture.diff(mPast, 'hours', false);
 
     if (hours < 1) {
-        mins = mPast.diff(mFuture, 'minutes', false);
+        mins = mFuture.diff(mPast, 'minutes', false);
         return mins + " minute" + (mins==1?"":"s");
     }  
     else if (hours < 24) {
@@ -171,7 +171,7 @@ exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;
 exports.getAtString = getAtString;
 exports.parseDurationFromTokens = parseDurationFromTokens;
-exports.getDateDiffString = getDateDiffStringUsingMoment;
+exports.getDateDiffString = getDateDiffString;
 exports.getReason = getReason;
 exports.validateReason = validateReason;
 exports.validateMentions = validateMentions;
