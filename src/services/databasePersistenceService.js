@@ -55,9 +55,30 @@ async function putTankedUser(userObjToPut) {
 }
 
 /* 
-Update one or more tanking records
+Untank a user normally
 */
-async function putUpdatedRecords(updatedRecords) {
+async function putUntankedUser(userIdToUntank) {
+    try {
+        await client.connect();
+        const database = client.db(CONFIG.databaseName);
+        const drunkTank = database.collection(CONFIG.drunkTankCollection);
+
+      
+        const filter = { user_tanked: {"$eq": tankRecord.user_tanked } };
+        const options = { upsert: false };
+        const result = await drunkTank.updateMany(filter, { archive: true, historical_tank:false }, options);
+        return result;
+
+    }
+    finally {
+        //await client.close();
+    }
+}
+
+/* 
+Untank a user if they have left the server -- historical_tank=true
+*/
+async function putUntankedUser(updatedRecords) {
     try {
         await client.connect();
         const database = client.db(CONFIG.databaseName);
