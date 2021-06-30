@@ -5,28 +5,40 @@ var CONFIG;
 function injectConfig(myConfig) {
     CONFIG = myConfig;
 }
-var momennt = require('moment')
+var moment = require('moment');
 
-function getDateDiffString(future, past) {
-    var diffseconds = parseInt((future - past) / 1000); 
-    var diffMinutes = diffseconds / 60
-    var diffHours = diffMinutes / 60
+function getDateDiffStringUsingMoment(future, past) {
+    var mPast = moment(past);
+    var mFuture = moment(future);
 
-    var seconds =  parseInt(diffseconds % 60);
-    var minutes =  parseInt(diffMinutes % 60);
-    var hours =  parseInt(diffHours > 23 ? diffHours % 24 : diffHours);
-    var days = parseInt(hours / 24)
+    hours = mPast.diff(mFuture, 'hours', true)
+    roundedHours = mPast.diff(mFuture, 'hours', false);
 
-   var result = days > 0 ? days + " days, " : "" +
-                hours + " hours, " +
-                minutes + " minutes" +
-                " & " + seconds + " seconds";
-    
-    return result;
-}
+    if (hours < 1) {
+        mins = mPast.diff(mFuture, 'minutes', false);
+        return mins + " minute" + (mins==1?"":"s");
+    }  
+    else if (hours < 24) {
+        if (roundedHours == hours) {
+            return roundedHours + " hour" + (roundedHours>1?"s":"");
+        }
+        else {
+            roundedMinutes = Math.round((hours-roundedHours) * 60);
+            return roundedHours + " hours and " + roundedMinutes + " minute" + (roundedMinutes>1?"s":"");
+        }
+    }
+    else  {
+        days = Math.floor(hours / 24);
+        realHours = roundedHours - (days * 24);
+        
+        if (realHours == 0) {
+            return days + " day" + (days == 1?"":"s");
+        }
+        else {
+            return days + " day" + (days == 1?"":"s") + " and " + realHours + " hour" + (realHours>1?"s":"");
+        }
 
-function getDateDiffStringUsingMoment(past) {
-    moment(past/1000, 's').fromNow()
+    }
 }
 
 function getReason(tokens) {
@@ -159,7 +171,7 @@ exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;
 exports.getAtString = getAtString;
 exports.parseDurationFromTokens = parseDurationFromTokens;
-exports.getDateDiffString = getDateDiffString;
+exports.getDateDiffString = getDateDiffStringUsingMoment;
 exports.getReason = getReason;
 exports.validateReason = validateReason;
 exports.validateMentions = validateMentions;
