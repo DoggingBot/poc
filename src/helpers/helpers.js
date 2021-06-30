@@ -5,6 +5,7 @@ var CONFIG;
 function injectConfig(myConfig) {
     CONFIG = myConfig;
 }
+var momennt = require('moment')
 
 function getDateDiffString(future, past) {
     var diffseconds = parseInt((future - past) / 1000); 
@@ -22,6 +23,10 @@ function getDateDiffString(future, past) {
                 " & " + seconds + " seconds";
     
     return result;
+}
+
+function getDateDiffStringUsingMoment(past) {
+    moment(past/1000, 's').fromNow()
 }
 
 function getReason(tokens) {

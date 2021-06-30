@@ -7,12 +7,15 @@
     "testserver": "node main.js testcfg",
     "testserver:linux": "node main.js test_linux",
     "druncord": "node main.js druncord",
-    "druncord_linux": "node main.js druncord_linux"
+    "druncord_linux": "node main.js druncord_linux",
+    "test": "jest"
   },
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0",
-    "jest": "^27.0.1"
+    "dotenv": "^10.0.0"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
   }
 }
