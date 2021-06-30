@@ -5,23 +5,40 @@ var CONFIG;
 function injectConfig(myConfig) {
     CONFIG = myConfig;
 }
+var moment = require('moment');
 
 function getDateDiffString(future, past) {
-    var diffseconds = parseInt((future - past) / 1000); 
-    var diffMinutes = diffseconds / 60
-    var diffHours = diffMinutes / 60
+    var mPast = moment(past);
+    var mFuture = moment(future);
 
-    var seconds =  parseInt(diffseconds % 60);
-    var minutes =  parseInt(diffMinutes % 60);
-    var hours =  parseInt(diffHours > 23 ? diffHours % 24 : diffHours);
-    var days = parseInt(hours / 24)
+    hours = mFuture.diff(mPast, 'hours', true)
+    roundedHours = mFuture.diff(mPast, 'hours', false);
 
-   var result = days > 0 ? days + " days, " : "" +
-                hours + " hours, " +
-                minutes + " minutes" +
-                " & " + seconds + " seconds";
-    
-    return result;
+    if (hours < 1) {
+        mins = mFuture.diff(mPast, 'minutes', false);
+        return mins + " minute" + (mins==1?"":"s");
+    }  
+    else if (hours < 24) {
+        if (roundedHours == hours) {
+            return roundedHours + " hour" + (roundedHours>1?"s":"");
+        }
+        else {
+            roundedMinutes = Math.round((hours-roundedHours) * 60);
+            return roundedHours + " hours and " + roundedMinutes + " minute" + (roundedMinutes>1?"s":"");
+        }
+    }
+    else  {
+        days = Math.floor(hours / 24);
+        realHours = roundedHours - (days * 24);
+        
+        if (realHours == 0) {
+            return days + " day" + (days == 1?"":"s");
+        }
+        else {
+            return days + " day" + (days == 1?"":"s") + " and " + realHours + " hour" + (realHours>1?"s":"");
+        }
+
+    }
 }
 
 function getReason(tokens) {
