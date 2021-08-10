@@ -17,7 +17,7 @@ const rolesICannotTank = ['753412065456291901']; //Roles that we cannot command
 const defaultStaffChat = "753779129740034209";
 const writeMessageToDrunkTank = false;
 const warnAuthorizedUsage = false;
-const countedStrings = ['sip', 'burp', 'fart','vomit'];
+const countedStrings = ['sip'];
 const countedJsonPath = 'sipcount.json';
 
 
