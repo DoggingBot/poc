@@ -1,2 +1,6 @@
 node_modules
-.env    
+.env
+backup-bot.sh
+sipcount.json
+tankees.json
+backup.log
