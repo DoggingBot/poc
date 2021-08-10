@@ -1,5 +1,3 @@
-const BOT_VERSION = "1.1.0";
-
 var CONFIG;
 
 function injectConfig(myConfig) {
@@ -165,6 +163,11 @@ function getTopFive(stats) {
     return top5;
 }
 
+function getBotVersion() {
+    var pjson = require("../package.json");
+    return pjson.version;
+}
+
 exports.getTopFive = getTopFive;
 exports.convertRoleIdArrayToRoleNameArray = convertRoleIdArrayToRoleNameArray;
 exports.removeRoleFromArray = removeRoleFromArray;
@@ -180,4 +183,4 @@ exports.trimCommand = trimCommand;
 exports.trimMsg = trimMsg;
 exports.injectConfig = injectConfig;
 exports.doesUserHaveRole = doesUserHaveRole;
-exports.BOT_VERSION = BOT_VERSION;
+exports.BOT_VERSION = getBotVersion;

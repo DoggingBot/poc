@@ -15,7 +15,7 @@ async function handle(message) {
         "\r\n" + CONFIG.commandPrefix +"synctank - sync up the 2drunk2party role with the Bot tank log. " +        
         "\r\n" + CONFIG.commandPrefix +"help - Sends this help message" +
         "\r\n" +
-        "\r\n" + CONFIG.bot_name + " " + HELPERS.BOT_VERSION + " by stevie_pricks & Sindrah";
+        "\r\n" + CONFIG.bot_name + " " + HELPERS.BOT_VERSION() + " by stevie_pricks & Sindrah";
 
 
     message.channel.send(help);
