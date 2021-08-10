@@ -13,8 +13,13 @@ async function handle(message) {
 
     var userObj = persistenceService.addSip(action, userId, nickname);
 
+    var trailing_s = ""
+    if (userObj.count > 1) {
+        trailing_s = "s"
+    }
+
     var msgString = HELPERS.getAtString(userObj.userID) + 
-        " has enjoyed " + userObj.count + " " + userObj.sipStr + "s";
+        " has enjoyed " + userObj.count + " " + userObj.sipStr + trailing_s;
 
     if (userObj.count % 69 == 0 || userObj.count % 420 == 0) {
         msgString += ". Nice.";
