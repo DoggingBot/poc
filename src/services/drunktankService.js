@@ -32,8 +32,31 @@ async function tankUser(userToTankId, authorId, reason, duration, uom) {
     try {
         var rolesToTakeAway = await HELPERS.convertRoleIdArrayToRoleNameArray(userToTankObj.roles, guildService);
 
+        //Check if they have any roles that we can't work with
+        for (roleIcannotTank of CONFIG.rolesICannotTank) {
+            if (userToTankObj.roles.includes(roleIcannotTank)) {
+                //We cannot tank this user
+                roleObj = await guildService.getRole(roleIcannotTank);
+                msg = `Hey ${HELPERS.getAtString(authorId)}, I cannot remove the roles of ${userToTankObj.nickname} because they have the ${roleObj.name} role. You'll have to do this one yourself.`
+                await guildService.writeToChannel(CONFIG.logChannel, msg);
+                return;
+            }
+        }
+        
+
+        rolesToSet = [CONFIG.drunktankRole];
+        //Check if they have any roles we should ignore (ie not remove)
+        for (roleIShouldIgnore of CONFIG.rolesToIgnore) {
+            if (userToTankObj.roles.includes(roleIShouldIgnore)) {
+                //the user has a role that we intend to ignore, so lets add it to the roles we are setting
+                //so that we don't try to remove it.
+                rolesToSet.push(roleIShouldIgnore);
+            }
+        }
+
+
         //Set the roles
-        await guildService.setRolesForMember(userToTankId, [CONFIG.drunktankRole]);
+        await guildService.setRolesForMember(userToTankId, rolesToSet);
 
         var memberDisconnected = await guildService.disconnectMemberFromVC(userToTankId);
 

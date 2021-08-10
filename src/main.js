@@ -40,7 +40,7 @@ const client  = new Discord.Client({
 client.login(CONFIG.access_key);
 
 //Notify we are starting up
-console.log(CONFIG.bot_name + " " + HELPERS.BOT_VERSION + " starting up");
+console.log(CONFIG.bot_name + " " + HELPERS.BOT_VERSION() + " starting up");
 console.log("Configuration: " + configfile);
 
 

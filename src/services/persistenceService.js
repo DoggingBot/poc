@@ -111,11 +111,10 @@ function saveUserJoining(userIdThatJoined) {
             json[n].archive = false;
             json[n].historical_tank = false;
 
+            fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
             break;
         }
     }
-
-    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
 }
 
 /*
