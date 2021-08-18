@@ -28,16 +28,17 @@ async function handle(message) {
     if (userObj.count == 42) {
         msgString = "Sipping 42 sips is the answer to the ultimate Question of life, the universe, and everything"
     }
-
+    else if (userObj.count == 100) {
+        msgString = "100 " +userObj.sipStr +"s is a proud moment for any pisshead. ";
+    }
+    else if (userObj.count == 1000) {
+        msgString = "1000 " + userObj.sipStr + "s. That is impressive dedication to the art. Three cheers for " + HELPERS.getAtString(userObj.userID) + 
+            "! 🎉🎉🎉🎉🎉🎉";
+    }
     else {
-        if (userObj.count == 100) {
-            msgString = "100 " +userObj.sipStr +"s is a proud moment for any pisshead. ";
-        }
-        else {
-            if (Math.floor((Math.random() * 100) + 1) == 50) {
-                //make one in every 100 say something else
-                msgString = "You take a sip from your trusty vault 13 canteen.";
-            }
+        if (Math.floor((Math.random() * 100) + 1) == 50) {
+        //make one in every 100 say something else
+        msgString = "You take a sip from your trusty vault 13 canteen.";
         }
     }
 
