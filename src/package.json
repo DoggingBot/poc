@@ -1,22 +1,25 @@
 {
   "name": "tank_commander",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Drunk Tank bot",
   "main": "main.js",
   "scripts": {
-    "testserver": "node main.js testcfg",
-    "testserver:linux": "node main.js test_linux",
+    "testserver": "node --trace-warnings main.js test",
+    "testserver_linux": "node main.js test_linux",
     "druncord": "node main.js druncord",
     "druncord_linux": "node main.js druncord_linux",
-    "test": "jest"
+    "test": "node main.js test_db"
   },
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.7.2",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "mysql2": "^2.3.2"
   },
   "devDependencies": {
     "jest": "^27.0.6"
-  }
+  },
+  "nodeVersion": "12.16.3"
 }

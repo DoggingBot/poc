@@ -1,42 +1,13 @@
 require('dotenv').config();
-
-const drunktankRole = "753777735452852324";
-const tankChannel = "757031918628765806";
-const logChannel = "753778482844270605";
-const botMasterRole = "753412065456291901";
-const serverID = "795115424634372147";
-const tankUOM = "hours";
-const tankDuration = "12";
-const commandPrefix = ".";
 const access_key = process.env.druncord_access_key;
-const json_path = "tankees.json";
 const bot_name = "TankCommander";
-const bypassGMU = ['846086496028983296','821425253002903595','159985870458322944','850806881798324224'];//Bot itself, druncord, mee6 and role persistence
-const rolesToIgnore = ['756711648160645172']; //Roles that we do not try to remove or give
-const rolesICannotTank = ['753412065456291901']; //Roles that we cannot command
-const defaultStaffChat = "753779129740034209";
-const writeMessageToDrunkTank = false;
-const warnAuthorizedUsage = false;
-const countedStrings = ['sip'];
-const countedJsonPath = 'sipcount.json';
-
-
-exports.drunktankRole = drunktankRole
-exports.tankChannel = tankChannel
-exports.logChannel = logChannel
-exports.botMasterRole = botMasterRole
-exports.tankUOM = tankUOM
-exports.tankDuration = tankDuration
-exports.commandPrefix = commandPrefix
+const dbServer = {
+	host: process.env.db_host,
+  port: parseInt(process.env.db_port),
+  user: process.env.db_user,
+  password: process.env.db_pass,
+  database: process.env.db_database
+};
 exports.access_key = access_key
-exports.json_path = json_path
 exports.bot_name = bot_name
-exports.serverID = serverID
-exports.bypassGMU = bypassGMU
-exports.defaultStaffChat = defaultStaffChat
-exports.writeMessageToDrunkTank = writeMessageToDrunkTank;
-exports.warnAuthorizedUsage = warnAuthorizedUsage;
-exports.countedStrings = countedStrings;
-exports.countedJsonPath = countedJsonPath;
-exports.rolesICannotTank = rolesICannotTank;
-exports.rolesToIgnore = rolesToIgnore;
+exports.dbServer = dbServer;

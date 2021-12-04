@@ -6,87 +6,103 @@ const MESSAGES = require('../helpers/messages');
 const LOGGER = require('../helpers/logger');
 
 
+/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
 var CONFIG;
-
 function injectConfig(_cfg) {
     CONFIG = _cfg;
 }
+*/
 
 /*
 tank a user
 
-tankedMember = string userId
-authorId = string userId
+tankedMember = Object GuildMember
+authorId = Object GuildMember
 reason = string
 duration = string
 uom = string
 */
-async function tankUser(userToTankId, authorId, reason, duration, uom) {
-
-    var userToTankObj = await guildService.getMemberForceLoad(userToTankId);
-    var authorObj = guildService.getMemberFromCache(authorId);
-
-
-    LOGGER.log("Drunk tanking " + userToTankObj.nickname + " -- initiated by " + authorObj.nickname);
+async function tankUser(guild, userToTank, author, reason, duration, uom) {
+    LOGGER.log("Drunk tanking " + userToTank.user.tag + " (" + userToTank.id + ") -- initiated by " + author.user.tag + " (" + author.id + ")");
   
     try {
-        var rolesToTakeAway = await HELPERS.convertRoleIdArrayToRoleNameArray(userToTankObj.roles, guildService);
-
+        var rolesToTakeAway = await HELPERS.convertRoleIdArrayToRoleNameArray(userToTank._roles, guildService);
         //Check if they have any roles that we can't work with
-        for (roleIcannotTank of CONFIG.rolesICannotTank) {
-            if (userToTankObj.roles.includes(roleIcannotTank)) {
-                //We cannot tank this user
-                roleObj = await guildService.getRole(roleIcannotTank);
-                msg = `Hey ${HELPERS.getAtString(authorId)}, I cannot remove the roles of ${userToTankObj.nickname} because they have the ${roleObj.name} role. You'll have to do this one yourself.`
-                await guildService.writeToChannel(CONFIG.logChannel, msg);
-                return;
-            }
-        }
-        
+				var rolesICannotTank = CONFIG.servers[guild].rolesICannotTank === null ? [] : CONFIG.servers[guild].rolesICannotTank;
+					for (roleIcannotTank of rolesICannotTank) {
+							if (userToTank._roles.includes(roleIcannotTank) || userToTank._roles.includes(CONFIG.servers[guild].botUserRole) || userToTank._roles.includes(CONFIG.servers[guild].botMasterRole) || userToTank.permissions.has(1 << 3)) {
+									//We cannot tank this user
+									roleObj = await guildService.getRole(roleIcannotTank);
+									msg = "Hey <@" + author.id + ">, I cannot tank " + userToTank.displayName + " because they have the " + roleObj.name + " role. You'll have to do this one yourself."
+									await guildService.writeToChannel('logChannel', msg);
+									return;
+							}
+					}
 
-        rolesToSet = [CONFIG.drunktankRole];
+        rolesToSet = [CONFIG.servers[guild].drunktankRole];
         //Check if they have any roles we should ignore (ie not remove)
-        for (roleIShouldIgnore of CONFIG.rolesToIgnore) {
-            if (userToTankObj.roles.includes(roleIShouldIgnore)) {
+        var rolesToIgnore = CONFIG.servers[guild].rolesToIgnore === null ? [] : CONFIG.servers[guild].rolesToIgnore;
+				for (roleIShouldIgnore of rolesToIgnore) {
+            if (userToTank._roles.includes(roleIShouldIgnore)) {
                 //the user has a role that we intend to ignore, so lets add it to the roles we are setting
                 //so that we don't try to remove it.
                 rolesToSet.push(roleIShouldIgnore);
             }
         }
-
-
+				
+				// Remember user's roles before we change them
+				let rolesTaken = userToTank._roles;
+				
         //Set the roles
-        await guildService.setRolesForMember(userToTankId, rolesToSet);
+        await guildService.setRolesForMember(userToTank.id, rolesToSet);
 
-        var memberDisconnected = await guildService.disconnectMemberFromVC(userToTankId);
-
+        var memberDisconnected = await guildService.disconnectMemberFromVC(userToTank.id);
         //Construct the blue log message
         msg = MESSAGES.log_blue_tank_msg(
-            authorObj.nickname, 
-            HELPERS.getAtString(userToTankId), 
-            userToTankObj.username, 
-            userToTankObj.id, 
+            author, 
+            userToTank, 
             reason,
+						rolesToTakeAway,
             memberDisconnected
         );
-        
+				
+				
+				//////
+				
+				// Were they already in the tank? If so, close out that record before inserting a new record
+				let tankees = await persistenceService.getTankedUsers(guild, true, userToTank.id);
+				var isTanked = false;
+				Object.entries(tankees).forEach(([t,r]) => {
+					if (r.user_tanked === userToTank.id) {
+						isTanked = r;
+					}
+				});
+				if (isTanked){
+						// Update their current tank record first
+						await persistenceService.saveUntanking(guild, userToTank.id, author.id, "Already tanked - retanking");
+				}
+				
+				//////
+				
+				//Save the tanking
+        await persistenceService.saveTanking(guild, userToTank.id, author.id, reason, duration, uom, rolesTaken);
+				
         //Write the log message to the blue log channel
-        await guildService.writeToChannel(CONFIG.logChannel, msg);
+        await guildService.writeToChannel('logChannel', msg);
 
-        //Save the tanking
-        persistenceService.saveTanking(userToTankId, authorObj.nickname, reason, duration, uom, userToTankObj.roles);
+        
 
         //if enabled, write a notification to the drunk tank channel after 10 seconds
-        if (CONFIG.writeMessageToDrunkTank) {
+        if (CONFIG.servers[guild].writeMessageToDrunkTank) {
             setTimeout(() => {
                 msg = MESSAGES.tank_msg(
-                    authorObj.nickname, 
-                    HELPERS.getAtString(tankedMember), 
+                    author, 
+                    userToTank, 
                     reason,  
                     duration, 
                     uom
                 );
-                guildService.writeToChannel(CONFIG.tankChannel, msg);
+                guildService.writeToChannel('tankChannel', msg, false);
             }, 10000);
         }
     
@@ -96,37 +112,40 @@ async function tankUser(userToTankId, authorId, reason, duration, uom) {
         });
     }
     catch(error)  {
-        var errorMsg = "Failed to handle tanking for user: " + userToTankId + 
+        var errorMsg = "Failed to handle tanking for user: " + userToTank.id + 
         "\r\nDo I have the permissions to manage this user?" +
         "\r\n"+error;
 
-        await guildService.writeToChannel(CONFIG.logChannel, errorMsg);
+        await guildService.writeToChannel('logChannel', errorMsg);
 
         return Promise.reject(error);
     }
-
 }
 
 /*
 untank a user
 
-untankedMemberId = string userId
+untankedMember = string userId
 authorId = string userId 
 untankedMemberJson = our tank record for this user if there is one
 
 Returns the roles we gave them back as a string
 */
-async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
+async function untankUser(guild, untankedMember, author, untankedMemberJson, reason) {
 
-    var untankedUserObj = await guildService.getMemberForceLoad(untankedMemberId);
-    var authorObj = guildService.getMemberFromCache(authorId);
-
-    //make sure we don't accidently give back the 2drunk2party role
+    //make sure we don't accidently give back the drunktank role
     var rolesToGiveBack = [];
+		var rolesToGiveBackStr = "";
     var datediff = "";
-
     if (untankedMemberJson != undefined) {
-        rolesToGiveBack = HELPERS.removeRoleFromArray(untankedMemberJson.roles_to_give_back, CONFIG.drunktankRole);
+        rolesToGiveBack = HELPERS.removeRoleFromArray(untankedMemberJson.roles_to_give_back, CONFIG.servers[guild].drunktankRole);
+
+        // Sometimes an empty string ends up in the array. Remove it so users can get untanked
+        rolesToGiveBack.forEach((o,i) => {
+            if (o === "") {
+                rolesToGiveBack.splice(i,1);
+            }
+        });
 
         //Build a string that describes how long this person was tanked
         let ts = Date.now();
@@ -134,27 +153,27 @@ async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
     } else {
         datediff = "unknown"
     }
-    
-    //Convert the role ID's to strings for readable output
-    var rolesToGiveBackStr = await HELPERS.convertRoleIdArrayToRoleNameArray(rolesToGiveBack, guildService);
+    //Convert the role ID's to strings for readable output, or skip it if they had none
+		if (untankedMemberJson.roles_to_give_back.join() !== "") {
+			rolesToGiveBackStr = await HELPERS.convertRoleIdArrayToRoleNameArray(rolesToGiveBack, guildService);
+		}
 
     try {
-        await guildService.setRolesForMember(untankedMemberId, rolesToGiveBack);
+				await guildService.setRolesForMember(untankedMember.id, rolesToGiveBack);
 
         //Construct the blue log message
         msg = MESSAGES.log_blue_untank_msg(
-            authorObj.nickname,
-            HELPERS.getAtString(untankedMemberId), 
-            untankedUserObj.username, 
-            untankedUserObj.id, 
+            author,
+            untankedMember,
+						reason,
             datediff
         );
 
         //Write the log message to the blue log channel
-        await guildService.writeToChannel(CONFIG.logChannel, msg);
+        await guildService.writeToChannel('logChannel', msg);
 
         //Save the untanking
-        persistenceService.saveUntanking(untankedMemberId);
+        persistenceService.saveUntanking(guild, untankedMember.id, author.id, reason);
 
         //Return a resolved promise with the roles we gave them back
         return Promise.resolve({
@@ -163,16 +182,16 @@ async function untankUser(untankedMemberId, authorId, untankedMemberJson) {
         });
 
     } catch(error)  {
-        var errorMsg = "Failed to handle tanking for user: " + untankedMemberId + 
+        var errorMsg = "Failed to handle untanking for user: " + untankedMember.id + 
         "\r\nDo I have the permissions to manage this user?" +
         "\r\n"+error;
 
-        await guildService.writeToChannel(CONFIG.logChannel, errorMsg);
+        await guildService.writeToChannel('logChannel', errorMsg);
 
         return Promise.reject(error);
     };
 }
 
-exports.injectConfig  = injectConfig;
+//exports.injectConfig  = injectConfig;
 exports.tankUser = tankUser;
 exports.untankUser = untankUser;

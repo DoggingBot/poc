@@ -1,18 +1,34 @@
 var TheGuild;
+var bufferService = require('./bufferService');
 function injectGuild(guild) {
     TheGuild = guild;
 }
-var CONFIG;
 
+/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
+var CONFIG;
 function injectConfig(_cfg) {
     CONFIG = _cfg;
 }
+*/
 
 const LOGGER = require('../helpers/logger');
 
-async function writeToChannel(channelId, message) {
-    var channel = TheGuild.channels.cache.get(channelId);
-    return channel.send(message);
+async function writeToChannel(channel, message, doBuffer) {
+	  // Ensure the channel requested exists, otherwise send the message to buffers and notify admins in systemChannel
+		if (arguments.length === 2) {
+			doBuffer = true;
+		}
+		var ch = TheGuild.channels.cache.get(CONFIG.servers[TheGuild.id][channel]);
+		if (((ch === undefined) || (ch === null)) && (doBuffer)) {
+			// The channel is no longer correct, save the message to the buffers
+			bufferService.saveBuffer(channel,message);
+			// now notify Admins of the occurence in the systemChannel
+			var msg = "<@&" + CONFIG.servers[TheGuild.id].botMasterRole + "> the invites channel doesn't exist!" + 
+			"\r\n Run " + "`" + CONFIG.servers[TheGuild.id].commandPrefix + "config " + channel.replace("Channel","") + " <channel>` to fix it.";
+			
+			await writeToChannel(Theguild.systemChannelID, msg);
+		}
+    return ch.send(message);
 }
 
 async function getRole(roleId) {
@@ -25,14 +41,7 @@ async function getRole(roleId) {
 }
 
 function getMemberFromCache(userId) {
-    userObj = TheGuild.members.cache.get(userId);
-
-    return { 
-        id:  userObj.id,
-        nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
-        userid:  userObj.user.id,
-        roles: userObj._roles//.map(role => role.id)
-    }
+    return TheGuild.members.cache.get(userId); // return the actual cached member object
 }
 
 async function setRolesForMember(userId, roles) {
@@ -41,8 +50,8 @@ async function setRolesForMember(userId, roles) {
         cache: false,
         force: true
     };
-
-    userObj = await TheGuild.members.fetch(fetchObj);
+		roles = ((roles.length === 1) && (roles[0] === "")) ? [] : roles;
+    userObj = await TheGuild.members.fetch(fetchObj).catch((e)=>{return null;});
     return userObj.roles.set(roles);
 }
 
@@ -52,14 +61,7 @@ async function getMemberForceLoad(userId) {
         cache: false,
         force: true
     };
-    userObj = await TheGuild.members.fetch(fetchObj);
-
-    return { 
-        id:  userObj.id,
-        nickname:  userObj.nickname == null ? userObj.user.username : userObj.nickname,
-        username:  userObj.user.username,
-        roles: userObj._roles
-    }
+    return await TheGuild.members.fetch(fetchObj).catch((e)=>{return null;}); // return the actual refreshed member object
 }
 
 async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
@@ -82,7 +84,7 @@ async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
         }
     
         var authorId = value.executor.id;
-        if (CONFIG.bypassGMU.includes(authorId)) {
+        if (CONFIG.servers[TheGuild.id].bypassGMU.includes(authorId)) {
             byBot=true;
             continue;
         }
@@ -96,10 +98,10 @@ async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
         }
     }
     if (byBot) {
-        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. Looks like it might have been one of the bots.");
+        LOGGER.log("Detected role change event performed by a bypassing user in server " + TheGuild.id + ".");
     }
     else {
-        LOGGER.log("Detected Drunk tank event and could not find corresponding audit entry. This is bad.");
+        LOGGER.log("Detected role change event and could not find audit log entry in server " + TheGuild.id + ".");
     }
     return Promise.reject();
 }
@@ -110,12 +112,12 @@ async function disconnectMemberFromVC(userId) {
         cache: false,
         force: true
     };
-    userObj = await TheGuild.members.fetch(fetchObj);
+    userObj = await TheGuild.members.fetch(fetchObj).catch((e)=>{return null;});
 
     try {
         if (userObj.voice != undefined) {
             if (userObj.voice.channel != undefined) {
-                await userObj.voice.kick();
+                await userObj.voice.kick(); // v13 is .disconnect()
                 return true;
             }
         }
@@ -134,4 +136,4 @@ exports.writeToChannel = writeToChannel;
 exports.getMemberFromCache = getMemberFromCache;
 exports.getMemberForceLoad = getMemberForceLoad;
 exports.injectGuild = injectGuild;
-exports.injectConfig = injectConfig;
+//exports.injectConfig = injectConfig;

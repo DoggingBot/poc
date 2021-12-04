@@ -1,76 +1,154 @@
-
 var persistenceService = require('./persistenceService');
-
+var moment = require('moment');
 const HELPERS = require('../helpers/helpers');
 
+/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
 var CONFIG;
+function injectConfig(_cfg) {
+    CONFIG = _cfg;
+}
+*/
 
-function injectConfig(myConfig) {
-    CONFIG = myConfig;
+async function filterTankStats(guild, user) {
+	var json = persistenceService.getTankedUsers(guild);
+	
+	if (user) {
+		Object.entries(json).forEach(([i,o]) => {
+			if (!((o.user_tanked === user.id) || (o.tanked_by === user.id) || (o.untanked_by === user.id))) {
+				delete json[i];
+			}
+		});
+	}
+	
+	return json;
 }
 
-async function getTankStatsStr() {
-    var json = persistenceService.getTankHistory();
-
+async function getTankStatsStr(json, filtered) {
     var tankerStats = {};
-    var tankeeStats = {};
+		var untankerStats = {};
+		var tankeeStats = {};
     var currentTanked = 0;
     var everTanked = 0;
 
     //Build our tankee and tanker stats
-    json.forEach( (obj) => {
+    Object.entries(json).forEach( ([i,o]) => {
         everTanked++;
-        if (!obj.archive) currentTanked++;
+        if (!o.time_untanked) currentTanked++;
 				
-        if (tankeeStats[obj.user_tanked] == undefined) {
-            tankeeStats[obj.user_tanked] = 1;
+        if (tankeeStats[o.user_tanked] == undefined) {
+            tankeeStats[o.user_tanked] = 1;
         } else {
-            tankeeStats[obj.user_tanked]++;
+            tankeeStats[o.user_tanked]++;
         }
-        if (tankerStats[obj.tanked_by] == undefined) {
-            if (obj.tanked_by == "Unknown") {
+        if (tankerStats[o.tanked_by] == undefined) {
+            if (!o.tanked_by) {
                 return;
             }
-            tankerStats[obj.tanked_by] = {};
-			tankerStats[obj.tanked_by][obj.user_tanked] = 1;
+            tankerStats[o.tanked_by] = {};
+						tankerStats[o.tanked_by][o.user_tanked] = 1;
         } else {
-            if (tankerStats[obj.tanked_by][obj.user_tanked] == undefined) {
-				tankerStats[obj.tanked_by][obj.user_tanked] = 1;
-			} else {
-				tankerStats[obj.tanked_by][obj.user_tanked]++;
-			}
+            if (tankerStats[o.tanked_by][o.user_tanked] == undefined) {
+							tankerStats[o.tanked_by][o.user_tanked] = 1;
+						} else {
+							tankerStats[o.tanked_by][o.user_tanked]++;
+						}
+        }
+				if (untankerStats[o.untanked_by] == undefined) {
+            if (!o.untanked_by) {
+                return;
+            }
+            untankerStats[o.untanked_by] = {};
+						untankerStats[o.untanked_by][o.user_tanked] = 1;
+        } else {
+            if (untankerStats[o.untanked_by][o.user_tanked] == undefined) {
+							untankerStats[o.untanked_by][o.user_tanked] = 1;
+						} else {
+							untankerStats[o.untanked_by][o.user_tanked]++;
+						}
         }
     });
 
     //Trim to be the top 5 only
     tankeeTopFive = getTopFive(tankeeStats);
     tankerTopFive = getTopFive(tankerStats);
+		untankerTopFive = getTopFive(untankerStats);
     uniqueTanked = Object.keys(tankeeStats).length;
-	
-    return convertToString(tankeeTopFive, tankerTopFive, tankerStats, currentTanked, everTanked, uniqueTanked);
+		
+		msg = "=== Tankstats ===";
+		if (filtered) {
+			var mrec = 0;
+			// First check if the user is/was a staff member
+			if ((tankerStats[filtered.id] !== undefined) || (untankerStats[filtered.id] !== undefined)) {
+				//Include Staff Info
+				msg += "\r\nStaff Member: <@" + filtered.id + ">" +
+				"\r\n --Top 5 Tanked--";				
+				await tankeeTopFive.forEach((obj,i)=> {
+						msg+= "\r\n" + (i + 1) + ". <@" + obj.name + "> has been tanked " + obj.count + " times.";
+				});
+				await tankerTopFive.forEach((obj,i) => {
+					let vn = "";
+					let vc = 0;
+					Object.entries(tankerStats[obj.name]).forEach((v) => {
+						if (v[1] > vc) {
+								vn = v[0];
+								vc = v[1];
+						}
+					});
+					msg += "\r\n" + obj.name + " has tanked on " + obj.count + " occasions ("+Object.keys(tankerStats[obj.name]).length+" unique users). Favourite victim: <@" +  vn + ">";
+				});
+			} else {
+				// Add tankee info
+				msg += "\r\nServer Member: <@" + filtered.id + ">";
+				Object.entries(json).forEach(([i,o]) => {
+					if (parseInt(i,10) > parseInt(mrec,10)) {
+						mrec = i;
+					}
+				});
+				mrec = json[mrec];
+				msg += "\r\nTanked " + tankeeStats[filtered.id] + " times."
+			}
+			msg += "\r\nMost Recent Tanking: <@" + mrec.user_tanked + "> tanked by <@" + mrec.tanked_by + "> on " +
+			moment(mrec.time_tanked).format("ddd MMM D, YYYY HH:mm:ss UTC");
+		}
+    msg += await convertToString(tankeeTopFive, tankerTopFive, untankerTopFive, tankerStats, untankerStats, currentTanked, everTanked, uniqueTanked);
+		return msg;
 }
 
 
-async function convertToString(tankeeTopFive, tankerTopFive, tankerStats, currentTanked, everTanked, uniqueTanked) {
-    var msg = "There are " + currentTanked + " people currently tanked.";
+async function convertToString(tankeeTopFive, tankerTopFive, untankerTopFive, tankerStats, untankerStats, currentTanked, everTanked, uniqueTanked) {
+		msg = "\r\nThere are " + currentTanked + " people currently tanked.";
     msg += "\r\n" + everTanked + " tankings have occurred in total.";
     msg += "\r\n" + uniqueTanked + " unique users have been tanked.";
-    msg += "\r\n\r\n==Drunk tank hall of shame==";
+    msg += "\r\n\r\n==Drunk Tank Hall of Shame==";
     await tankeeTopFive.forEach((obj,i)=> {
-        msg+= "\r\n" + (i + 1) + ". " + HELPERS.getAtString(obj.name) + " has been tanked " + obj.count + " times.";
+        msg+= "\r\n" + (i + 1) + ". <@" + obj.name + "> has been tanked " + obj.count + " times.";
     });
-    msg += "\r\n\r\n==Most Korrupt Mods==";
+    msg += "\r\n\r\n==Most Korrupt Staff==";
     await tankerTopFive.forEach((obj,i) => {
 	    let vn = "";
-		let vc = 0;
-        Object.entries(tankerStats[obj.name]).forEach((v) => {
+			let vc = 0;
+      Object.entries(tankerStats[obj.name]).forEach((v) => {
 			if (v[1] > vc) {
 			    vn = v[0];
 			    vc = v[1];
 			}
 		});
 		if (obj.name != "") {
-            msg += "\r\n" + (i + 1) + ". " + obj.name + " has tanked on " + obj.count + " occasions ("+Object.keys(tankerStats[obj.name]).length+" unique users). Favourite victim: " +  HELPERS.getAtString(vn);
+            msg += "\r\n" + (i + 1) + ". <@" + obj.name + "> has tanked on " + obj.count + " occasions ("+Object.keys(tankerStats[obj.name]).length+" unique users). Favourite victim: <@" +  vn + ">";
+        }
+    });
+		msg += "\r\n\r\n==Staff That Care==";
+    await untankerTopFive.forEach((obj,i) => {
+	    let vn = "";
+			let vc = 0;
+      Object.entries(untankerStats[obj.name]).forEach((v) => {
+			if (v[1] > vc) {
+			    vn = v[0];
+			    vc = v[1];
+			}
+		});
+		if (obj.name != "") {
+            msg += "\r\n" + (i + 1) + ". <@" + obj.name + "> has untanked on " + obj.count + " occasions ("+Object.keys(untankerStats[obj.name]).length+" unique users). Soft spot for: <@" +  vn + ">";
         }
     });
 
@@ -101,5 +179,6 @@ function getTopFive(stats) {
     return top5;
 }
 
-exports.injectConfig = injectConfig;
+//exports.injectConfig = injectConfig;
 exports.getTankStatsStr = getTankStatsStr;
+exports.filterTankStats = filterTankStats;
