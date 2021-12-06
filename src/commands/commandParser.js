@@ -34,7 +34,8 @@ async function parseCommand(message,configured) {
     //Also try and catch mistakes. Especially watch p as its used by the rhythm bot
     if (message.content.startsWith(cfg.commandPrefix + cfg.commandPrefix) ||
         message.content.startsWith(cfg.commandPrefix + "p") ||
-        message.content.startsWith(cfg.commandPrefix + " ") 
+        message.content.startsWith(cfg.commandPrefix + " ") ||
+        message.content === (cfg.commandPrefix + "")
     ) return;   
     authorId = message.author.id;
     var refreshedAuthorObj = await guildService.getMemberForceLoad(authorId);   
