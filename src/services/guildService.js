@@ -65,45 +65,64 @@ async function getMemberForceLoad(userId) {
 }
 
 async function getExecutorForRoleChangeFromAuditLog(roleId, targetMemberId) {
-    var auditlog = await TheGuild.fetchAuditLogs({
-		limit: 5,
-		type: 'MEMBER_UPDATE_ROLES'
-	});
+	// Delayed audit logs can cause the bot to fail here. Allow the bot to retry a few times before giving up.
+	// If the bot ultimately fails to find the audit log entry (failure on Discord API to produce an audit log entry), return a rejection.
+	// Promise.reject() should be handled by the caller to determine how this should proceed.
+	
+	var byBot = false;
+	
+	for (i = 0; i < 5; i++) {
+		var auditlog = await TheGuild.fetchAuditLogs({
+			limit: 5,
+			type: 'MEMBER_UPDATE_ROLES'
+		});
 
-    var byBot = false;
+		for (let [key, value] of auditlog.entries) {
+			if (value == undefined) {
+				continue;
+			}
+			if (value.changes == undefined) {
+				continue;
+			}
+			if (value.changes[0]["new"] == undefined) {
+				continue;
+			}
 
-    for (let [key, value] of auditlog.entries) {
-        if (value == undefined) {
-            continue;
-        }
-        if (value.changes == undefined) {
-            continue;
-        }
-        if (value.changes[0]["new"] == undefined) {
-            continue;
-        }
-    
-        var authorId = value.executor.id;
-        if (CONFIG.servers[TheGuild.id].bypassGMU.includes(authorId)) {
-            byBot=true;
-            continue;
-        }
-
-        if (value.changes[0]["new"][0].id === roleId && value.target == targetMemberId) {
-            return Promise.resolve({
-                authorId: authorId,
-                auditAction: value.changes[0].key,
-                actionRequired: true
-            });
-        }
-    }
-    if (byBot) {
-        LOGGER.log("Detected role change event performed by a bypassing user in server " + TheGuild.id + ".");
-    }
-    else {
-        LOGGER.log("Detected role change event and could not find audit log entry in server " + TheGuild.id + ".");
-    }
-    return Promise.reject();
+			if (value.changes[0]["new"][0].id === roleId && value.target == targetMemberId) {
+				// Don't break out for bypassing user UNLESS the full audit log matches
+				var authorId = value.executor.id;
+				if (CONFIG.servers[TheGuild.id].bypassGMU.includes(authorId)) {
+					byBot=true;
+					continue;
+				}
+				
+				return Promise.resolve({
+					authorId: authorId,
+					auditAction: value.changes[0].key,
+					actionRequired: true
+				});
+			}
+		}
+		
+		if (byBot) {
+			continue; // breaks out of this loop as well
+		}
+		
+		// Failed to find the audit log entry on this run. Make the loop await a 1 second timeout before continuing.
+		await new Promise((resolve,reject) => {
+      setTimeout(function(){resolve();},1000);
+    });
+	}
+	
+	var result = "BYPASS";
+	if (byBot) {
+			LOGGER.log("Detected role change event performed by a bypassing user in server " + TheGuild.id + ".");
+	}
+	else {
+			LOGGER.log("Detected role change event and could not find audit log entry in server " + TheGuild.id + ".");
+			result = "FAILURE";
+	}
+	return Promise.reject(result);
 }
 
 async function disconnectMemberFromVC(userId) {
