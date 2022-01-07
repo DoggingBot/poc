@@ -40,27 +40,31 @@ The Bot will respond to the following commands:
 
 When a user is tanked, the bot will automatically remove all of their other roles (provided it has permissions to), excluding any roles listed in rolesToIgnore, and will apply the drunktankRole. It will re-grant the old roles when a user is untanked. This will work either via the commands or the handled events.
 
+# Maintenance Access
+
+If you host and maintain a copy of the bot, or just happen to have your user ID held in the developers array in /services/dmService.js, you can DM the bot to execute a command found in the /developer directory. Currently, there is one command found in this directory: reloadcommands.js. executing that command will forcibly reload all JS files in /services, /events, /helpers, /managers, /commands, and /developer, replacing previously existing modules with altered files of the same name. This effectively allows a bot maintainer to hotload any changes in those directories whilst keeping the bot online. Do keep in mind that you could crash your bot if your changes contain any fatal errors (future update planned to test changes of new files prior to overwriting or including them).
+
 Config:
 
 Configuration is held in 3 areas - .env, config/filename.js, and the config table in the database. .env contains sensitive information for the bot, such as the access_key for the bot_user, and the database connection details (including the DB user and password). The config file used will load the settings from .env and set the bot name for main.js. The remaining configuration settings have been migrated to be stored in the database on a per-server instance. The Discord Server configurations are:
 
-commandPrefix - the character to be accepted as the command prefix. Limited to 1 character, default is "."
-botMasterRole - role ID that can control all aspects of the bot, primarily configuration. Users with Administrator privileges are considered bot Masters. Currently limited to one role.
-botUserRole - role ID that the bot will allow to use all commands except botMasterRole commands. Currently limited to one role.
-drunktankRole - the role ID to use for tanking a user.
-tankChannel - the channel ID that a tanked user can see - used for blocking sipCommand triggers and sending tankees a tank message.
-logChannel - channel ID where to log tank/untank commands.
-invitesChannel - channel ID where to log all created/deleted/used invites as well as invite and account information of a user that has left.
-namesChannel - channel ID where to log all username and nickname changes.
-modlogChannel - channel ID where to log all upper-level event logs (currently only includes role changes not involving drunktankRole).
-bypassGMU - list of user/role IDs that the bot will ignore messages from - cannot command the bot at all. The bot itself does not need to be included, it already checks for itself.
-rolesToIgnore - list of role IDs that will not be given or taken by the bot - default config adds the server Booster role to this list, just to avoid errors on attempts.
-rolesICannotTank - list of role IDs the bot is explicitly forbidden from being able to tank/untank. botUserRole and botMasterRole cannot be tanked/untanked, no need to add them.
-tankUOM - the default unit of measure - 'days', 'hours', or 'minutes' - for tanking when a duration is not specified with the tank command. Default is 'hours'.
-tankDuration - the default amount of time to tank when a duration is not specified with the tank command. Default is 12.
-writeMessageToDrunkTank - Whether or not to send an extra message to the tanked user in the drunktank about who tanked them, for how long, and why (if given). Default is false.
-warnAuthorizedUsage - Whether the bot will respond, insultingly, to an unauthorized user's attempt to use a command. Default is false.
-startServer - Boolean flag that determines if the bot is ready to respond to anything other than "configure" commands. Default is false.
+* commandPrefix - the character to be accepted as the command prefix. Limited to 1 character, default is "."
+* botMasterRole - role ID that can control all aspects of the bot, primarily configuration. Users with Administrator privileges are considered bot Masters. Currently limited to one role.
+* botUserRole - role ID that the bot will allow to use all commands except botMasterRole commands. Currently limited to one role.
+* drunktankRole - the role ID to use for tanking a user.
+* tankChannel - the channel ID that a tanked user can see - used for blocking sipCommand triggers and sending tankees a tank message.
+* logChannel - channel ID where to log tank/untank commands.
+* invitesChannel - channel ID where to log all created/deleted/used invites as well as invite and account information of a user that has left.
+* namesChannel - channel ID where to log all username and nickname changes.
+* modlogChannel - channel ID where to log all upper-level event logs (currently only includes role changes not involving drunktankRole).
+* bypassGMU - list of user/role IDs that the bot will ignore messages from - cannot command the bot at all. The bot itself does not need to be included, it already checks for itself.
+* rolesToIgnore - list of role IDs that will not be given or taken by the bot - default config adds the server Booster role to this list, just to avoid errors on attempts.
+* rolesICannotTank - list of role IDs the bot is explicitly forbidden from being able to tank/untank. botUserRole and botMasterRole cannot be tanked/untanked, no need to add them.
+* tankUOM - the default unit of measure - 'days', 'hours', or 'minutes' - for tanking when a duration is not specified with the tank command. Default is 'hours'.
+* tankDuration - the default amount of time to tank when a duration is not specified with the tank command. Default is 12.
+* writeMessageToDrunkTank - Whether or not to send an extra message to the tanked user in the drunktank about who tanked them, for how long, and why (if given). Default is false.
+* warnAuthorizedUsage - Whether the bot will respond, insultingly, to an unauthorized user's attempt to use a command. Default is false.
+* startServer - Boolean flag that determines if the bot is ready to respond to anything other than "configure" commands. Default is false.
 
 When setting up a new server initially, the only base command that will be accepted is "configure" (not to be confused with "config"). "configure" can only be run by an Administrator when the server's "start" property is false. When the command with zero additional arguments is given, the bot is triggered to create a new configuration entry in the database as well as creating new tables for the server, initially loaded with default values. IMPORTANT: the channel that the command ".configure" is initially run in will be used for ALL the log channels until they are changed, so it is advised that the configure command is executed in a private channel. Once all the necessary settings have been configured, the ability to set the "start" property to true can be accepted, and the bot will commence.
 
