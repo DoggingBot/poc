@@ -1,13 +1,6 @@
-const HELPERS = require('../helpers/helpers');
-var dbManager = require('../managers/dbConnectionManager.js');
-var persistenceService = require('../services/persistenceService');
-
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
+function help(prefix) {
+    return prefix + "config - configures various settings. Use `" + prefix + "config help` for more info.\r\n";
 }
-*/
 
 async function configure(m,p) {
 	// THIS COMMAND SHOULD ONLY RUN ON AN UNCONFIGURED SERVER AND ONLY BY AN ADMINISTRATOR.
@@ -109,12 +102,12 @@ async function configure(m,p) {
 			]
 		};
 		
-		await dbManager.Query(queryConfig);
-		await dbManager.Query(queryTankees);
-		await dbManager.Query(queryBuffers);
-		await dbManager.Query(querySips);
-		await dbManager.Query(queryInvites);
-		await dbManager.Query(queryInviteUses);
+		await MANAGERS.dbConnectionManager.Query(queryConfig);
+		await MANAGERS.dbConnectionManager.Query(queryTankees);
+		await MANAGERS.dbConnectionManager.Query(queryBuffers);
+		await MANAGERS.dbConnectionManager.Query(querySips);
+		await MANAGERS.dbConnectionManager.Query(queryInvites);
+		await MANAGERS.dbConnectionManager.Query(queryInviteUses);
 		
 		await reloadConfig(m.guild.id);
 		var msg = "";
@@ -161,9 +154,9 @@ async function configure(m,p) {
 async function resolveCommand(message) {
 	// .configure and .config will both redirect here. We allow .configure to change settings whilst the server has not started, but it will change over to .config once started.
 	// .config cannot alter startServer.
-	var command = HELPERS.trimCommand(message);
-	var tokens = HELPERS.trimMsg(message);
-	tokens = HELPERS.tokenize(tokens.substr(1,tokens.length -1));
+	var command = HELPERS.helpers.trimCommand(message);
+	var tokens = HELPERS.helpers.trimMsg(message);
+	tokens = HELPERS.helpers.tokenize(tokens.substr(1,tokens.length -1));
 	var setting = tokens[0];
 	tokens.slice(1);
 	var msg = "";
@@ -185,7 +178,7 @@ async function resolveCommand(message) {
 			values: [true, message.guild.id]
 		};
 		
-		await dbManager.Query(queryConfig);
+		await MANAGERS.dbConnectionManager.Query(queryConfig);
 		await reloadConfig(message.guild.id);
 		if (CONFIG.servers[message.guild.id].startServer) {
 			msg = "Server Configuration successfully loaded and started.";
@@ -644,7 +637,7 @@ async function resolveCommand(message) {
 						 "\r\n```" +
 						 "\r\nhelp, getinvites, forceReload" +
 						 "\r\n```" +
-						 "\r\nBot Version: " + HELPERS.BOT_VERSION() + " - written by stevie_pricks#1903 & Sindrah#9620";
+						 "\r\nBot Version: " + HELPERS.helpers.BOT_VERSION() + " - written by stevie_pricks#1903 & Sindrah#9620";
 			break;
 		case "forceReload":
 		  let x = JSON.stringify(CONFIG.servers[message.guild.id]);
@@ -659,8 +652,7 @@ async function resolveCommand(message) {
 			}
 		  break;
 		case "getinvites":
-		  inviteService = require("../services/inviteService");
-			let invs = await inviteService.storeInvites(message.guild);
+			let invs = await SERVICES.inviteService.storeInvites(message.guild);
 			if (!invs.err) {
 				msg += invs.saved + " Invite" + (invs.saved === 1 ? " has " : "s have ") + "been stored in the database.";
 			} else {
@@ -726,7 +718,7 @@ async function updateConfig(guild, setting, value) {
 		values: [value, guild]
 	};
 	
-	await dbManager.Query(query);
+	await MANAGERS.dbConnectionManager.Query(query);
 	
 	await reloadConfig(guild);
 	
@@ -759,14 +751,14 @@ async function updateConfig(guild, setting, value) {
 }
 
 async function reloadConfig(g) {
-	var rec = await dbManager.Query({"select": "config", "columns":["*"], "where": "serverID = ?", "orderby": "serverID", "values":[g]});
+	var rec = await MANAGERS.dbConnectionManager.Query({"select": "config", "columns":["*"], "where": "serverID = ?", "orderby": "serverID", "values":[g]});
 	if (rec.length) {
 		rec.forEach((e) => {
 			CONFIG.servers[e.serverID.toString()] = e;
 		});
 		rec = {};
 		rec[g] = CONFIG.servers[g];
-		rec = HELPERS.convertDataFromDB(rec,"cfg");
+		rec = HELPERS.helpers.convertDataFromDB(rec,"cfg");
 		CONFIG.servers[g] = rec[g];
 		return true;
 	}
@@ -774,13 +766,12 @@ async function reloadConfig(g) {
 }
 
 async function handle(m) {
-	var guildService = require('../services/guildService');
-	var refreshedAuthorObj = await guildService.getMemberForceLoad(m.author.id);
+	var refreshedAuthorObj = await SERVICES.guildService.getMemberForceLoad(m.author.id);
 	if (!(
 		refreshedAuthorObj._roles.includes(CONFIG.servers[m.guild.id].botMasterRole) ||
 		m.member.permissions.has(1 << 3)
 	)) {
-		LOGGER.log("UNAUTHORIZED USAGE ATTEMPT: <@" + m.author.id + "> (" + m.author.tag + ") (" + m.author.id + ") Tried to use me with this command: " + m.content);
+		HELPERS.logger.log("UNAUTHORIZED USAGE ATTEMPT: <@" + m.author.id + "> (" + m.author.tag + ") (" + m.author.id + ") Tried to use me with this command: " + m.content);
 		if (CONFIG.servers[m.guild.id].warnAuthorizedUsage)
 			m.channel.send("You don't have the rights to use me you filthy swine!");
 		return;
@@ -790,5 +781,5 @@ async function handle(m) {
 }
 
 exports.handle = handle;
-//exports.injectConfig = injectConfig;
 exports.configure = configure;
+exports.help = help;

@@ -1,12 +1,6 @@
-const HELPERS = require('../helpers/helpers');
-var persistenceService = require('../services/persistenceService');
-
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
+function help() {
+    return "";
 }
-*/
 
 async function handle(message) {
     var action = message.content.toLowerCase();
@@ -23,7 +17,7 @@ async function handle(message) {
 	if (message.channel.id === CONFIG.servers[message.guild.id].tankChannel) {
 		return;
 	}
-	var userObj = await persistenceService.addSip(guild, action, userId, message.createdTimestamp);
+	var userObj = await SERVICES.persistenceService.addSip(guild, action, userId, message.createdTimestamp);
 		
 		var acting = action + action.substr(-1) + "ing";
 		var slowdowns = [
@@ -37,7 +31,7 @@ async function handle(message) {
 		
 		// Was the sip rejected for being too soon?
 		if ((userObj.slow !== undefined) && (userObj.slow)) {
-			msgString = HELPERS.fisherYates(slowdowns)[0];
+			msgString = HELPERS.helpers.fisherYates(slowdowns)[0];
 		} else {
 		
 			var trailing_s = ""
@@ -75,4 +69,4 @@ async function handle(message) {
 }
 
 exports.handle = handle;
-//exports.injectConfig = injectConfig;
+exports.help = help;

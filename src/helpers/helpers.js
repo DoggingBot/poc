@@ -1,10 +1,3 @@
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
-}
-*/
-
 var moment = require('moment');
 
 function fisherYates(arr) {
@@ -142,11 +135,6 @@ function parseDurationFromTokens(tokens, guild) {
     }
 }
 
-// DEPRECATED AND REMOVED; Unnecessary, can be done inline with less code usage.
-function getAtString(userId) {
-    return "<@"+userId+">";
-}
-
 function getOldRoles(tankedMember){
     return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
 } 
@@ -232,7 +220,6 @@ exports.getTopFive = getTopFive;
 exports.convertRoleIdArrayToRoleNameArray = convertRoleIdArrayToRoleNameArray;
 exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;
-//exports.getAtString = getAtString; // DEPRECATED AND REMOVED
 exports.parseDurationFromTokens = parseDurationFromTokens;
 exports.getDateDiffString = getDateDiffString;
 exports.getReason = getReason;
@@ -241,7 +228,5 @@ exports.validateMentions = validateMentions;
 exports.tokenize = tokenize;
 exports.trimCommand = trimCommand;
 exports.trimMsg = trimMsg;
-//exports.injectConfig = injectConfig;
-//exports.doesUserHaveRole = doesUserHaveRole; DEPRECATED AND REMOVED; uses inline ._roles.includes(roleId);
 exports.convertDataFromDB = convertDataFromDB;
 exports.BOT_VERSION = getBotVersion;

@@ -1,5 +1,4 @@
 var moment = require('moment');
-const HELPERS = require('./helpers');
 
 function confirm_tank_message(author, tankedMember, reason, drunktankRole, roles) {
     return author.displayName +
@@ -42,8 +41,8 @@ function tank_msg(author, tankedMember, reason, duration, uom) {
 function user_leave_msg(oldMember, invite) {
 		return "<@" + oldMember.id + "> (" + oldMember.user.tag + ") (" + oldMember.id + ") **LEFT**" +
 		"\r\nInvited by " + (invite !== null ? "<@" + invite.inviter + "> (" + invite.inviter + ") with code **" + invite.code + "**" : "-Unknown-") +
-		"\r\nThe user account was created " + moment(oldMember.user.createdAt).format("MMM D, YYYY @ HH:mm:ss UTC") + " (" + HELPERS.getDateDiffString(Date.now(), oldMember.user.createdAt) + " ago)" +
-		"\r\nThe user was in the server for " + (oldMember.joinedTimestamp !== "unknown" ? HELPERS.getDateDiffString(Date.now(), oldMember.joinedTimestamp) : "an unknown time (needs manual lookup)") +
+		"\r\nThe user account was created " + moment(oldMember.user.createdAt).format("MMM D, YYYY @ HH:mm:ss UTC") + " (" + HELPERS.helpers.getDateDiffString(Date.now(), oldMember.user.createdAt) + " ago)" +
+		"\r\nThe user was in the server for " + (oldMember.joinedTimestamp !== "unknown" ? HELPERS.helpers.getDateDiffString(Date.now(), oldMember.joinedTimestamp) : "an unknown time (needs manual lookup)") +
     "\r\n" + oldMember.leaveReason;
 		
 }
@@ -51,7 +50,7 @@ function user_leave_msg(oldMember, invite) {
 function user_join_msg(member, invite) {
 		return "<@" + member.id + "> (" + member.user.tag + ") (" + member.id + ") JOINED" +
 		"\r\nInvited by " + (invite !== null ? "<@" + invite.inviter + "> (" + invite.inviter + ") with code **" + invite.code + "**" : "-Unknown-") +
-		"\r\nThe user account was created " + moment(member.user.createdAt).format("MMM D, YYYY @ HH:mm:ss UTC") + " (" + HELPERS.getDateDiffString(Date.now(), member.user.createdAt) + " ago)";
+		"\r\nThe user account was created " + moment(member.user.createdAt).format("MMM D, YYYY @ HH:mm:ss UTC") + " (" + HELPERS.helpers.getDateDiffString(Date.now(), member.user.createdAt) + " ago)";
 }
 
 function user_name_change_msg(oldMember, namechange, change) {

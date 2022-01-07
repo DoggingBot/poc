@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs-then-native");
+
 // ==========================================================
 // =========== Setup our app and Configure ==================
 // ==========================================================
@@ -12,51 +15,36 @@ else {
 
 //Pull in our functional objects as constants
 const CONFIG_FILE = require('./config/' + configfile);
-const HELPERS = require('./helpers/helpers');
+global.HELPERS = {};
+global.EVENTS = {};
+global.SERVICES = {};
+global.MANAGERS = {};
+global.COMMANDS = {};
+global.DEVELOPER = {};
 
-//instantiate our db connection manager
-var dbManager = require('./managers/dbConnectionManager.js');
-
-//if the db is unavailable, we cannot proceed
 var serverCONFIGquery = {"select": "config", "columns":["*"], "where": "?", "orderby": "serverID", "values":[1]};
 global.CONFIG = {servers:{},dbServer: CONFIG_FILE.dbServer, bot_name: CONFIG_FILE.bot_name};
 global.RETORTS = {"select": "retorts", "columns":["*"], "where": "?", "values":[1]};
+
 async function start() {
-	rec = await dbManager.Query(serverCONFIGquery);
+	await handleAfterMessage("RELOAD");
+}
+
+start().then(async () => {
+	//if the db is unavailable, we cannot proceed
+	rec = await MANAGERS.dbConnectionManager.Query(serverCONFIGquery);
 	rec.forEach((e) => {
 		CONFIG.servers[e.serverID.toString()] = e;
 	});
-	CONFIG.servers = HELPERS.convertDataFromDB(CONFIG.servers,"cfg");
+	CONFIG.servers = HELPERS.helpers.convertDataFromDB(CONFIG.servers,"cfg");
 	
-	rec = await dbManager.Query(RETORTS);
+	rec = await MANAGERS.dbConnectionManager.Query(RETORTS);
 	RETORTS = [];
 	rec.forEach((e) => {
 		RETORTS.push(e.line);
 	});
-}
-start().then(async () =>{
-	//instantiate all our services
-	var bufferService = require('./services/bufferService');
-	var guildService = require('./services/guildService.js');
-	var persistenceService = require('./services/persistenceService');
-	var drunkTankService = require('./services/drunktankService');
-	var tankStatsService = require('./services/tankStatsService');
-	var inviteService = require('./services/inviteService');
-	//var syncTankService = require('./services/syncTankService'); DEPRECATED AND REMOVED; uses DB now instead of DRP
-	var commandParser = require('./commands/commandParser');
-
-	/*Connect up all our services & CONFIGure them -- DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-	bufferService.injectConfig(CONFIG);
-	drunkTankService.injectConfig(CONFIG);
-	persistenceService.injectConfig(CONFIG);
-	guildService.injectConfig(CONFIG);
-	commandParser.injectConfig(CONFIG);
-	//syncTankService.injectConfig(CONFIG); DEPRECATED AND REMOVED; uses DB now instead of DRP
-	tankStatsService.injectConfig(CONFIG);
-
-	HELPERS.injectConfig(CONFIG);
-  */
-	
+})
+.then(async () =>{
 	//Log into our discord client
 	const Discord = require("discord.js");
 	// Possibly include a global of Permissions from Discord.js
@@ -66,7 +54,7 @@ start().then(async () =>{
 	client.login(CONFIG_FILE.access_key);
 
 	//Notify we are starting up
-	console.log(CONFIG_FILE.bot_name + " " + HELPERS.BOT_VERSION() + " starting up");
+	console.log(CONFIG_FILE.bot_name + " " + HELPERS.helpers.BOT_VERSION() + " starting up");
 	console.log("Configuration: " + configfile);
 
 
@@ -103,20 +91,16 @@ start().then(async () =>{
 	//When a server invite is created
 	client.on("inviteCreate", async (invite) => {
 		if (serverConfigured(invite.guild)) {
-			guildService.injectGuild(invite.guild);
-			var command = require('./events/inviteEvent');
-			//command.injectConfig(CONFIG); DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-			return command.handle(invite, false);
+			SERVICES.guildService.injectGuild(invite.guild);
+			return EVENTS.inviteEvent.handle(invite, false);
 		}
 	});
 	
 	//When a server invite is deleted
 	client.on("inviteDelete", async (invite) => {
 		if (serverConfigured(invite.guild)) {
-			guildService.injectGuild(invite.guild);
-			var command = require('./events/inviteEvent');
-			//command.injectConfig(CONFIG); DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-			return command.handle(invite, true);
+			SERVICES.guildService.injectGuild(invite.guild);
+			return EVENTS.inviteEvent.handle(invite, true);
 		}
 	});
 	
@@ -127,17 +111,16 @@ start().then(async () =>{
 		Object.entries(CONFIG.servers).forEach(([serverID,cfg]) => {
 			servers.push(serverID);
 		});
-		var command = require('./events/memberUpdateEvent');
 		for (i = 0; i < servers.length; i++) {
 			// Loop through each server. If configured, fetch guildMember of altered user,
 			// then call memberUpdateEvent for userUpdate using that server.
 			let guild = await o.client.guilds.fetch(servers[0]);
 			if (serverConfigured(guild)) {
-				guildService.injectGuild(guild);
+				SERVICES.guildService.injectGuild(guild);
 				// is user in this guild?
-				let guildMember = await guildService.getMemberForceLoad(o.id);
+				let guildMember = await SERVICES.guildService.getMemberForceLoad(o.id);
 				if ((guildMember !== null) && (guildMember !== undefined)) {
-					await command.handle(o,n, "userUpdate");
+					await EVENTS.memberUpdateEvent.handle(o,n, "userUpdate");
 				}
 			}
 		}
@@ -147,30 +130,24 @@ start().then(async () =>{
 	//When an existing member is changed on the server
 	client.on("guildMemberUpdate", async (o,n) => {
 		if (serverConfigured(o.guild)) {
-			guildService.injectGuild(o.guild);
-			var command = require('./events/memberUpdateEvent');
-			//command.injectConfig(CONFIG); DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-			return command.handle(o,n,"guildMemberUpdate");
+			SERVICES.guildService.injectGuild(o.guild);
+			return EVENTS.memberUpdateEvent.handle(o,n,"guildMemberUpdate");
 		}
 	});
 
 	//When a member joins the server
 	client.on("guildMemberAdd", async (o) => {
 		if (serverConfigured(o.guild)) {
-			guildService.injectGuild(o.guild);
-			var command = require('./events/memberJoinEvent');
-			//command.injectConfig(CONFIG); DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-			return command.handle(o);
+			SERVICES.guildService.injectGuild(o.guild);
+			return EVENTS.memberJoinEvent.handle(o);
 		}
 	});
 	
 	//When a member leaves the server
 	client.on("guildMemberRemove", async (o) => {
 		if (serverConfigured(o.guild)) {
-			guildService.injectGuild(o.guild);
-			var command = require('./events/memberLeaveEvent');
-			//command.injectConfig(CONFIG); DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-			return command.handle(o);
+			SERVICES.guildService.injectGuild(o.guild);
+			return EVENTS.memberLeaveEvent.handle(o);
 		}
 	});
 	
@@ -178,15 +155,131 @@ start().then(async () =>{
 	client.on("message", async  (message) => {
 		if (!message.guild) {
 			if (message.author.id !== client.user.id) {
-				let msg = HELPERS.fisherYates(RETORTS);
-				return message.channel.send(msg[0]);
+				await SERVICES.dmService.respondDM(message)
+				.then((response)=>{
+					handleAfterMessage(response);
+				});
 			}
 		} else {
-			if (message.author.id !== client.user.id) {
-				// Prevents endless looped responses and checking on our own messages.
-				guildService.injectGuild(message.guild);
-				return commandParser.parseCommand(message,serverConfigured(message.guild,true));
+			SERVICES.guildService.injectGuild(message.guild); // so we can use the guildService to check if the user is a bypassing user
+			var isBypasser = await SERVICES.guildService.isBypassingGMU(message.author);
+			if (!isBypasser) {
+				// Prevents endless looped responses on our own messages, and ignores any message from a bypassing member.
+				await SERVICES.commandService.parseCommand(message,serverConfigured(message.guild,true))
+				.then((response)=>{
+					handleAfterMessage(response);
+				});
 			}
 		}
 	});
 });
+
+async function handleAfterMessage(action) {
+	if (action === "RELOAD") {
+		console.log("Reload requested");
+		// Include any new services, events, helpers, managers, or commands, and update anything that may have changed.
+		await fs.readdir(path.resolve("./services"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					SERVICES[f.replace(".js","")] = require("./services/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(SERVICES).forEach((s) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"services",s[0]))];
+				SERVICES[s[0]] = require(path.join(__dirname,"services",s[0]));
+			});
+		})
+		.catch(err => {
+			return console.log("Unable to scan directory: " + err);
+		});
+
+		await fs.readdir(path.resolve("./events"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					EVENTS[f.replace(".js","")] = require("./events/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(EVENTS).forEach((e) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"events",e[0]))];
+				EVENTS[e[0]] = require(path.join(__dirname,"events",e[0]));
+			});
+		})
+		.catch(err => {
+				return console.log("Unable to scan directory: " + err);
+		});
+		await fs.readdir(path.resolve("./helpers"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					HELPERS[f.replace(".js","")] = require("./helpers/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(HELPERS).forEach((h) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"helpers",h[0]))];
+				HELPERS[h[0]] = require(path.join(__dirname,"helpers",h[0]));
+			});
+		})
+		.catch(err => {
+				return console.log("Unable to scan directory: " + err);
+		});
+		await fs.readdir(path.resolve("./managers"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					MANAGERS[f.replace(".js","")] = require("./managers/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(MANAGERS).forEach((m) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"managers",m[0]))];
+				MANAGERS[m[0]] = require(path.join(__dirname,"managers",m[0]));
+			});
+		})
+		.catch(err => {
+				return console.log("Unable to scan directory: " + err);
+		});
+		await fs.readdir(path.resolve("./commands"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					COMMANDS[f.replace(".js","")] = require("./commands/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(COMMANDS).forEach((c) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"commands",c[0]))];
+				COMMANDS[c[0]] = require(path.join(__dirname,"commands",c[0]));
+			});
+		})
+		.catch(err => {
+				return console.log("Unable to scan directory: " + err);
+		});
+		await fs.readdir(path.resolve("./developer"))
+		.then(files => {
+			for (let f of files) {
+				if (path.extname(f) === ".js") {
+					DEVELOPER[f.replace(".js","")] = require("./developer/" + f);
+				}
+			}
+		})
+		.then(()=>{
+			Object.entries(DEVELOPER).forEach((d) =>{
+				delete require.cache[require.resolve(path.join(__dirname,"developer",d[0]))];
+				DEVELOPER[d[0]] = require(path.join(__dirname,"developer",d[0]));
+			});
+		})
+		.catch(err => {
+				return console.log("Unable to scan directory: " + err);
+		});
+	}
+}

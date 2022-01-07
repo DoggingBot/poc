@@ -1,11 +1,8 @@
-var dbManager = require('../managers/dbConnectionManager.js');
-var guildService = require('./guildService');
-
 var query = null;
 var qResults = null;
 
 async function queryDB(getColumns) {
-	qResults = await dbManager.Query(query,getColumns);
+	qResults = await MANAGERS.dbConnectionManager.Query(query,getColumns);
 	query = null;
 }
 
@@ -56,7 +53,7 @@ async function getInvites(guild) {
 			ulist += t.length;
 		});
 		if (invites[i].uses - invites[i].dummies !== ulist) {
-			guildService.writeToChannel('logChannel', 
+			SERVICES.guildService.writeToChannel('logChannel', 
 			"There was a disparity between the userlist and the uses count in the DB for invite code **" + i + "**." +
 			"\r\nUses count: " + invites[i].uses + " - Users listed: " + (ulist === 1 ? "1 use " : ulist + " uses ") + "and " + (invites[i].dummies === 1 ? "1 dummy" : invites[i].dummies + " dummies")
 			);
@@ -83,7 +80,7 @@ async function updateInvite(guild, invite, remove) {
 	// Make sure we got the invite properly
 	if (!qResults.length) {
 		// we got nothing, which is some kind of serious error or the record may have been manually deleted.
-		return await guildService.writeToChannel('logChannel', 
+		return await SERVICES.guildService.writeToChannel('logChannel', 
 			"<@&" + CONFIG.servers[guild].botMasterRole + "> The inviteService of the bot failed to retrieve an invite from the DB when it should have existed. Did someone delete the invite record manually from the DB?"
 		);
 	} else {
@@ -106,7 +103,7 @@ async function updateInvite(guild, invite, remove) {
 				query.sets = "uses = ?";
 				query.values = [invite.uses,invite.code];
 			} else {
-				await guildService.writeToChannel('logChannel', 
+				await SERVICES.guildService.writeToChannel('logChannel', 
 					"The invite " + invite.code + " saw more than one use between its last update (from " + dbinvites[0].uses + " to " + invite.uses + "). Perhaps the bot got flooded before it had a chance to properly handle newly added users."
 				);
 				query.sets = "uses = ?";
