@@ -31,7 +31,7 @@ async function handle(message) {
 					if (isBanned) {
 						// ban exists and was not caught yet. Close out the tank record and move on to the next tank record.
 						var user = await message.client.users.fetch(o.user_tanked);
-						await SERVICES.drunktankService.untankUser(message.guild.id, user, message.client.user, o, "Banned");
+						await SERVICES.drunkTankService.untankUser(message.guild.id, user, message.client.user, o, "Banned");
 						continue;
 					}
 					inServer = "**(NOT IN SERVER)**";
