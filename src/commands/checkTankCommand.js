@@ -1,35 +1,45 @@
-
 var persistenceService = require('../services/persistenceService');
 
 const HELPERS = require('../helpers/helpers');
 
+/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
 var CONFIG;
 function injectConfig(_cfg) {
     CONFIG = _cfg;
 }
+*/
 
 async function handle(message) {
     let ts = Date.now();
-    var json = persistenceService.getTankedUsers();
+    var json = await persistenceService.getTankedUsers(message.guild.id,true);
     var concat = "";
     var toSend = [];
-    for (n=0;n<json.length; n++) {
-        var obj = json[n];
-        if (obj.archive) {
-            continue;   
-        }
-        var datediff = HELPERS.getDateDiffString(ts, obj.time_tanked);
-        if (obj.tanked_by == "Unknown") {
-            msg = HELPERS.getAtString(obj.user_tanked) + " was not tanked by me. I learned about them " + datediff + " ago."; 
+		
+		// Due to a need to run an async wait command on every found tanked member,
+		// we are going to iterate the old fashioned way with forLoop.
+		// i = index = time_tanked; o = tankRecord;
+    var tankTimes = Object.keys(json);
+		for (i = 0; i < tankTimes.length; i++) {
+			let o = json[tankTimes[i]];
+        var datediff = HELPERS.getDateDiffString(ts, parseInt(o.time_tanked, 10));
+				var tanker = message.guild.members.cache.get(o.tanked_by);
+				if (tanker == undefined) {
+					tanker = await message.client.users.fetch(o.tanked_by);
+					tanker = tanker.username + " (" + tanker.tag + ") (" + tanker.id + ")";
+				} else {
+					tanker = tanker.displayName + "(" + tanker.user.tag + ") (" + tanker.id + ")";
+				}
+        if (o.tanked_by == 0) {
+            msg = "<@" + o.user_tanked + "> was not tanked by me. I learned about them " + datediff + " ago."; 
         }
         else {
-            msg = "(tanked " + datediff + " ago by " + obj.tanked_by 
-                + (obj.reason != "" ? " for " + obj.reason + ")" : ")");
-            if (ts > obj.time_to_untank) {
-                msg = HELPERS.getAtString(obj.user_tanked) + " has served their time. " + msg; 
+            msg = "(tanked " + datediff + " ago by " + tanker 
+                + (o.tank_reason != "" ? " for " + o.tank_reason + ")" : ")");
+            if (ts > o.time_to_untank) {
+                msg = "<@" + o.user_tanked + "> has served their time. " + msg; 
             }
             else {
-                msg = HELPERS.getAtString(obj.user_tanked) + " still has time to wait. " + msg
+                msg = "<@" + o.user_tanked + "> still has time to wait. " + msg;
             }
         }
 
@@ -55,4 +65,4 @@ async function handle(message) {
 }
 
 exports.handle = handle;
-exports.injectConfig = injectConfig;
+//exports.injectConfig = injectConfig;
