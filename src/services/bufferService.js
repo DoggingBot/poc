@@ -1,18 +1,11 @@
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
-}
-*/
-
-//instantiate our db connection manager
-var dbManager = require('../managers/dbConnectionManager.js');
-
 var query = null;
 var buffers = {};
 
 async function queryDB() {
-	rec = await dbManager.Query(query);
+	rec = await MANAGERS.dbConnectionManager.Query(query);
+	if (rec === null) {
+		console.log("[DB ERROR]: bufferService.queryDB()\nQuery: ", query);
+	}
 	if (query.select) {
 		buffers = {};
 		rec.forEach((e) => {
@@ -61,7 +54,6 @@ async function deleteBuffers(b) {
 	queryDB();
 }
 
-//exports.injectConfig = injectConfig;
 exports.getBuffers = getBuffers;
 exports.saveBuffer = saveBuffer;
 exports.deleteBuffers = deleteBuffers;

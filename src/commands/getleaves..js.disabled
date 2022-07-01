@@ -1,0 +1,54 @@
+function help(prefix) {  
+  return prefix + "getleaves - WIP, Admin Only";
+}
+
+async function handle(msgOBJ) {
+  if (!(msgOBJ.member.permissions.has(1 << 3))) {
+		// disallow non-admins
+    console.log("Not an Admin - getLeaves");
+		return false;
+	}
+	console.log("fetching Leavers");
+  let leaves = {
+    noob: {},
+    boosterOnly: {},
+    drunkard: {},
+    regular: {}
+  };
+  await msgOBJ.channel.messages.fetch({limit:100}).then(messages => {
+    console.log(Object.keys(messages).length);
+    Object.entries(messages).forEach(([id,msg]) =>{
+      if ((msg.content.indexOf("LEFT") !== -1) (msg.createdTimestamp >= 1655424000000)) { 
+        // User LEFT
+        let t_userID = msg.content.split(" ")[0].replace(/<|@|>/g,"");
+        let t_hangtime = msg.content.split("\r\n")[3].replace("The user was in the server for ","");
+        t_hangtime = parseHangTime(t_hangtime);
+        let t_userObj = msg.guild.members.cache.get(t_userID)
+        if (t_userObj._roles.includes("753412106346430504")) {
+          // File under Regular
+          leaves.regular[t_userID] = t_hangtime;
+        } else {
+          if (t_userObj._roles.includes("753413807606464512")) {
+            // File under Drunkard
+            leaves.drunkard[t_userID] = t_hangtime;
+          } else {
+            if (t_userObj._roles.includes("756711648160645172")) {
+              // File under BoosterOnly
+              leaves.boosterOnly[t_userID] = t_hangtime;
+            } else {
+              // File under noob
+              leaves.noob[t_userID] = t_hangtime;
+            }
+          }
+        }
+      }
+    });
+  });
+  
+  
+  console.log(leaves);
+	return;
+}
+
+exports.help = help;
+exports.handle = handle;

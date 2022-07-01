@@ -1,24 +1,25 @@
 require('dotenv').config();
 
-const drunktankRole = "795125880363679745";
-const tankChannel = "795125618957484052";
-const logChannel = "795125578494640188";
-const botMasterRole = "846036899523985449";
-const serverID = "795115424634372147";
+const drunktankRole = "892918061940736081";
+const tankChannel = "892922617114267678";
+const logChannel = "892922537900642315";
+const botMasterRole = "892918139208212480";
+const serverID = "880917338839470100";
 const tankUOM = "hours";
 const tankDuration = "12";
 const commandPrefix = ".";
-const access_key = process.env.test_access_key;
+const access_key = process.env.druncord_access_key;
 const json_path = "flatfiles/tankees.json";
-const bot_name = "StevieBot";
-const bypassGMU = ['775415118333870131','159985870458322944'];
-const rolesToIgnore = ['795138196366819348']; //Roles that we do not try to remove or give
+const bot_name = "Druncord Warden";
+const bypassGMU = ['840370023108968448','756311071836340316'];//Bot itself, druncord
+const rolesToIgnore = ['756711648160645172']; //Roles that we do not try to remove or give
 const rolesICannotTank = []; //Roles that we cannot command
-const defaultStaffChat = "801188002486812712";
+const defaultStaffChat = "880917340508782604";
 const writeMessageToDrunkTank = false;
 const warnAuthorizedUsage = false;
-const countedStrings = ['sip', 'burp', 'fart','vomit'];
+const countedStrings = ['sip'];
 const countedJsonPath = 'flatfiles/sipcount.json';
+
 
 exports.drunktankRole = drunktankRole
 exports.tankChannel = tankChannel

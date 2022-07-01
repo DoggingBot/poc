@@ -1,10 +1,3 @@
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
-}
-*/
-
 var moment = require('moment');
 
 function fisherYates(arr) {
@@ -142,11 +135,6 @@ function parseDurationFromTokens(tokens, guild) {
     }
 }
 
-// DEPRECATED AND REMOVED; Unnecessary, can be done inline with less code usage.
-function getAtString(userId) {
-    return "<@"+userId+">";
-}
-
 function getOldRoles(tankedMember){
     return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
 } 
@@ -167,7 +155,7 @@ async function convertRoleIdArrayToRoleNameArray(rolesToConvert, guildService) {
     retval = [];
 
     for (n = 0; n< rolesToConvert.length; n++) {
-        r = await guildService.getRole(rolesToConvert[n]);
+        r = await guildService.getRole(rolesToConvert[n]).catch((e)=>{return {name:"[DELETED-ROLE]"};});
         retval.push(r.name.toString());
     }
 
@@ -193,18 +181,25 @@ function convertDataFromDB(data,method) {
 			tmp[i.toString()].serverID = o.serverID.toString();
 			tmp[i.toString()].commandPrefix = o.commandPrefix.toString();
 			tmp[i.toString()].botMasterRole = o.botMasterRole === null ? null : o.botMasterRole.toString();
+            tmp[i.toString()].modUserRole = o.modUserRole === null ? null : o.modUserRole.toString();
 			tmp[i.toString()].botUserRole = o.botUserRole === null ? null : o.botUserRole.toString();
+            tmp[i.toString()].uncountedLimitRole = o.uncountedLimitRole === null ? null : o.uncountedLimitRole.toString();
 			tmp[i.toString()].drunktankRole = o.drunktankRole === null ? null : o.drunktankRole.toString();
+            tmp[i.toString()].minorRole = o.minorRole === null ? null : o.minorRole.toString();
+            tmp[i.toString()].verifiedRole = o.verifiedRole === null ? null : o.verifiedRole.toString();
 			tmp[i.toString()].tankChannel = o.tankChannel === null ? null : o.tankChannel.toString();
+            tmp[i.toString()].minorChannel = o.minorChannel === null ? null : o.minorChannel.toString();
 			tmp[i.toString()].logChannel = o.logChannel === null ? null : o.logChannel.toString();
 			tmp[i.toString()].invitesChannel = o.invitesChannel === null ? null : o.invitesChannel.toString();
 			tmp[i.toString()].namesChannel = o.namesChannel === null ? null : o.namesChannel.toString();
+            tmp[i.toString()].mentionsLog = o.mentionsLog === null ? null : o.mentionsLog.toString();
 			tmp[i.toString()].modlogChannel = o.modlogChannel === null ? null : o.modlogChannel.toString();
 			tmp[i.toString()].bypassGMU = o.bypassGMU.split(",");
 			tmp[i.toString()].rolesToIgnore = o.rolesToIgnore === null ? null : o.rolesToIgnore.split(",");
 			tmp[i.toString()].rolesICannotTank = o.rolesICannotTank === null ? null : o.rolesICannotTank.split(",");
 			tmp[i.toString()].tankUOM = o.tankUOM.toString();
 			tmp[i.toString()].tankDuration = parseInt(o.tankDuration, 10);
+            tmp[i.toString()].verifyAgeBy = parseInt(o.verifyAgeBy, 10);
 			tmp[i.toString()].writeMessageToDrunkTank = !!o.writeMessageToDrunkTank;
 			tmp[i.toString()].warnAuthorizedUsage = !!o.warnAuthorizedUsage;
 			tmp[i.toString()].startServer = !!o.startServer;
@@ -224,6 +219,16 @@ function convertDataFromDB(data,method) {
 			tmp[i.toString()].untanked_reason = o.untanked_reason === null ? null : o.untanked_reason;
 		});
 	}
+    if (method === "minor") {
+		Object.entries(data).forEach(([i,o]) => {
+			tmp[i.toString()] = {};
+			tmp[i.toString()].time = o.time;
+			tmp[i.toString()].user = o.user.toString();
+			tmp[i.toString()].staff_user = o.staff_user.toString();
+			tmp[i.toString()].ban_by = o.ban_by;
+			tmp[i.toString()].roles_to_give_back = o.roles_to_give_back.split(",");
+		});
+	}
 	return tmp;
 }
 
@@ -232,7 +237,6 @@ exports.getTopFive = getTopFive;
 exports.convertRoleIdArrayToRoleNameArray = convertRoleIdArrayToRoleNameArray;
 exports.removeRoleFromArray = removeRoleFromArray;
 exports.getOldRoles = getOldRoles;
-//exports.getAtString = getAtString; // DEPRECATED AND REMOVED
 exports.parseDurationFromTokens = parseDurationFromTokens;
 exports.getDateDiffString = getDateDiffString;
 exports.getReason = getReason;
@@ -241,7 +245,5 @@ exports.validateMentions = validateMentions;
 exports.tokenize = tokenize;
 exports.trimCommand = trimCommand;
 exports.trimMsg = trimMsg;
-//exports.injectConfig = injectConfig;
-//exports.doesUserHaveRole = doesUserHaveRole; DEPRECATED AND REMOVED; uses inline ._roles.includes(roleId);
 exports.convertDataFromDB = convertDataFromDB;
 exports.BOT_VERSION = getBotVersion;

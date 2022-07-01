@@ -13,10 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.7.2",
-    "discord.js": "^12.5.3",
+    "discord.js": "12.5.3",
     "dotenv": "^10.0.0",
     "moment": "^2.29.1",
-    "mysql2": "^2.3.2"
+    "mysql2": "^2.3.2",
+    "fs-then-native": "^2.0.0"
   },
   "devDependencies": {
     "jest": "^27.0.6"

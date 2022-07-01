@@ -1,28 +1,16 @@
-const HELPERS = require('../helpers/helpers');
-//instantiate our db connection manager
-var dbManager = require('../managers/dbConnectionManager.js');
-
 var query = null;
 var qResults = null;
 var tankees = {};
-var sips = {};
-
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
-}
-*/
 
 async function queryDB(getColumns) {
-	qResults = await dbManager.Query(query,getColumns);
+	qResults = await MANAGERS.dbConnectionManager.Query(query,getColumns);
 	query = null;
 }
 
 /*
 Save an individual user tanking event as a new record
 */
-async function saveTanking(guildID, userTanked, tankedBy, tankReason, duration, uom, oldRoles) {
+async function saveTanking(guildID, userTanked, tankedBy, reason, duration, uom, oldRoles) {
     let ts = Date.now();
     let untank_time = 0;
     
@@ -40,14 +28,14 @@ async function saveTanking(guildID, userTanked, tankedBy, tankReason, duration, 
 
     tankee_obj = {
         time_tanked: ts,
-				user_tanked: userTanked,
+		user_tanked: userTanked,
         tanked_by: tankedBy,
         tank_reason: reason,
         time_to_untank: untank_time,
         roles_to_give_back: oldRoles.join(","),
         time_untanked: null,
-				untanked_by: null,
-				untanked_reason: null
+		untanked_by: null,
+		untanked_reason: null
     }
 		
 		query = {
@@ -62,6 +50,35 @@ async function saveTanking(guildID, userTanked, tankedBy, tankReason, duration, 
 			query.values.push(tankee_obj[k]);
 		});
 		query.valueHolders = "(" + query.valueHolders.join() + ")";
+    queryDB();
+}
+
+/*
+Save a user record as a newly suspected minor.
+*/
+async function saveMinor(guildId, minorUserId, staffId, oldRoles) {
+    let ts = Date.now();
+    let deadline = ts + (CONFIG.servers[guildId].verifyAgeBy * 3600000);
+    minor_obj = {
+        time: ts,
+		user: minorUserId,
+        staff_user: staffId,
+        ban_by: deadline,
+        roles_to_give_back: oldRoles.join(",")
+    }
+		
+	query = {
+		insert: guildId + "_ageVerify",
+		columns: Object.keys(minor_obj),
+		valueHolders: [],
+		values: []
+	};
+	
+	Object.keys(minor_obj).forEach((k) => {
+		query.valueHolders.push("?");
+		query.values.push(minor_obj[k]);
+	});
+	query.valueHolders = "(" + query.valueHolders.join() + ")";
     queryDB();
 }
 
@@ -81,53 +98,15 @@ async function saveUntanking(guildID, userIdToUntank, untanker, untankReason) {
 }
 
 /*
-Update a tanked user to say they've left (thus removing them from the checktank)
- DEPRECATED; users stay in tank but are not mentioned in checktank command if they are not in the server
+Remove a suspected minor user record as newly verified
 */
-function saveUserLeaving(userIdThatLeft) {
-    data = fs.readFileSync(CONFIG.json_path);
-    var json = JSON.parse(data);
-
-    for (n=0;n<json.length; n++) {
-        if (json[n].archive) {
-            continue;   
-        }
-
-        //user matches and is a historical tank
-        if (json[n].user_tanked == userIdThatLeft) {
-
-            //mark this user as being in the tank historically
-            json[n].archive = true;
-            json[n].historical_tank = true;
-        }
-    }
-
-    fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
-}
-
-/*
-Update a newly joined user to say they have rejoined (thus including them in checktank again)
- DEPRECATED; users stay in tank but are not mentioned in checktank command if they are not in the server
-*/
-function saveUserJoining(userIdThatJoined) {
-    data = fs.readFileSync(CONFIG.json_path);
-    var json = JSON.parse(data);
-    
-    for (n=0;n<json.length; n++) {
-        if (!json[n].historical_tank) {
-            continue;   
-        }
-
-        //user matches and is a historical tank
-        if (json[n].user_tanked == userIdThatJoined) {
-            //unarchive the first one & break
-            json[n].archive = false;
-            json[n].historical_tank = false;
-
-            fs.writeFileSync(CONFIG.json_path, JSON.stringify(json))
-            break;
-        }
-    }
+async function removeMinor(guildId, adultMember) {
+	query = {
+		del: guildId + "_ageVerify",
+		where: "user = ?",
+		values: [adultMember]
+	};
+	queryDB();
 }
 
 /*
@@ -168,63 +147,56 @@ async function getTankedUsers(guild, filter, user) {
 		})
 		
 		.then(() => {
-			tankees = HELPERS.convertDataFromDB(tankees,"tank");
+			tankees = HELPERS.helpers.convertDataFromDB(tankees,"tank");
 		});
 		return tankees;
 }
 
 /*
-returns a json array of all full tank history
-DEPRECATED; filtration of tanked vs all is now handled by getTankedUsers()
+returns a json array of all currently suspected minor users from guild
+function will not filter results unless second arg evaluates to true
+function accepts third arg as userID to get only one user
 */
-function getTankHistory() {
-    if (!fs.existsSync(CONFIG.json_path)) {
-        return [];
-    }
-    var data = fs.readFileSync(CONFIG.json_path);
-    var json = JSON.parse(data)
-    return json;
-}
+async function getMinorUsers(guild, user) {
+    if (arguments.length === 1) {
+		user = false;
+	}
+		
+	query = {
+		select: guild + "_ageVerify",
+		columns: ["*"],
+		where: "?",
+		values: [1]
+	};
+	
+	if (user) {
+		query.where = "user = ?";
+		query.values = [user];
+	}
 
-/*
-returns a json representation of a tanked user if there is one
-DEPRECATED; uses getTankedUsers(guildID, true, UserID)
-*/
-function getUser(guild, userIdToGet) {
-    data = fs.readFileSync(CONFIG.json_path);
-    var json = JSON.parse(data)
-    user = json.find(obj => obj.archive == false && obj.user_tanked == userIdToGet);
-    return user;
-}
-
-/*
-returns a json representation of a tanked user if there is one
-checks historical records too to see if theyve left whilst tanked
-DEPRECATED; getTankedUsers() now returns this data.
-calling guildService.guild.member(id) verifies if the user is still in the server or not, and check if the user has not been untanked by untanked_time === null.
-*/
-function getUserHistorical(userIdToGet) {
-    data = fs.readFileSync(CONFIG.json_path);
-    var json = JSON.parse(data)
-    user = json.find(obj => 
-        obj.archive == true 
-        && obj.historical_tank == true
-        && obj.user_tanked == userIdToGet
-    );
-
-    return user;
+	await queryDB()
+	.then(() => {
+		tankees = {}; // no need for a separately named variabled here, so just use what already exists.
+		qResults.forEach((e) => {
+			tankees[e.user] = e; // unlike tank records, we organize by user ID because we aren't tracking stats on this.
+		});
+	})
+	
+	.then(() => {
+		tankees = HELPERS.helpers.convertDataFromDB(tankees,"minor");
+	});
+	return tankees;
 }
 
 /*
 Add a sip to the sip json 
 */
 async function addSip(guild, sipStr, userID, t) {
-    var u = await getSipCountForUser(guild,userID)		
+    var u = await getSipCountForUser(guild,userID);		
 		// the sipstring was already validated, so it is safe to concat it into the columns.
 		// Check for minimum time between sips
 		if ((u !== undefined) && (t - u.lastSip < 7000)) { // 7 seconds minimum sounds reasonable between sips
 			u.slow = true;
-			console.log(u);
 			return u;
 		} else {
 			if (u !== undefined) {
@@ -289,12 +261,9 @@ async function getSipCountForUser(guild, userID) {
 exports.addSip = addSip;
 exports.getAllSips = getAllSips;
 exports.getSipCountForUser = getSipCountForUser;
-//exports.getUser = getUser; //DEPRECATED
 exports.saveTanking = saveTanking;
 exports.getTankedUsers = getTankedUsers;
 exports.saveUntanking = saveUntanking;
-//exports.injectConfig = injectConfig; //DEPRECATED AND REMOVED
-//exports.getTankHistory = getTankHistory; //DEPRECATED
-//exports.getUserHistorical = getUserHistorical; DEPRECATED
-//exports.saveUserJoining = saveUserJoining; //DEPRECATED
-//exports.saveUserLeaving = saveUserLeaving; //DEPRECATED
+exports.getMinorUsers = getMinorUsers;
+exports.saveMinor = saveMinor;
+exports.removeMinor = removeMinor;

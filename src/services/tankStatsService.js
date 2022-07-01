@@ -1,16 +1,7 @@
-var persistenceService = require('./persistenceService');
 var moment = require('moment');
-const HELPERS = require('../helpers/helpers');
-
-/* DEPRECATED AND REMOVED; CONFIG lives in global namespace of main.js
-var CONFIG;
-function injectConfig(_cfg) {
-    CONFIG = _cfg;
-}
-*/
 
 async function filterTankStats(guild, user) {
-	var json = persistenceService.getTankedUsers(guild);
+	var json = SERVICES.persistenceService.getTankedUsers(guild);
 	
 	if (user) {
 		Object.entries(json).forEach(([i,o]) => {
@@ -179,6 +170,5 @@ function getTopFive(stats) {
     return top5;
 }
 
-//exports.injectConfig = injectConfig;
 exports.getTankStatsStr = getTankStatsStr;
 exports.filterTankStats = filterTankStats;
