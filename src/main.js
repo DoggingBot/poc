@@ -60,7 +60,7 @@ start().then(async () => {
 		Intents.FLAGS.DIRECT_MESSAGES,
 		Intents.FLAGS.MESSAGE_CONTENT
 	);
-	const client  = new Discord.Client({intents: BotIntents});
+	const client  = new Client({intents: BotIntents});
 	client.login(CONFIG_FILE.access_key);
 
 	//Notify we are starting up
