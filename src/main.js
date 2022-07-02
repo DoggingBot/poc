@@ -46,11 +46,21 @@ start().then(async () => {
 })
 .then(async () =>{
 	//Log into our discord client
-	const Discord = require("discord.js");
+	const {Client, Intents} = require("discord.js");
 	// Possibly include a global of Permissions from Discord.js
-	const client  = new Discord.Client({
-		ws: { intents: Discord.Intents.ALL } 
-	});
+	const BotIntents = new Intents();
+	BotIntents.add(
+		Intents.FLAGS.GUILDS,
+		Intents.FLAGS.GUILD_MEMBERS,
+		Intents.FLAGS.GUILD_BANS,
+		Intents.FLAGS.GUILD_INVITES,
+		Intents.FLAGS.GUILD_VOICE_STATES,
+		Intents.FLAGS.GUILD_MESSAGES,
+		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Intents.FLAGS.DIRECT_MESSAGES,
+		Intents.FLAGS.MESSAGE_CONTENT
+	);
+	const client  = new Discord.Client({intents: BotIntents});
 	client.login(CONFIG_FILE.access_key);
 
 	//Notify we are starting up
@@ -177,7 +187,7 @@ start().then(async () => {
 	});
 	
 	//When a message is sent to the server
-	client.on("message", async (message) => {
+	client.on("messageCreate", async (message) => {
 		if (!message.guild) {
 			if (message.author.id !== client.user.id) {
 				await SERVICES.dmService.respondDM(message)

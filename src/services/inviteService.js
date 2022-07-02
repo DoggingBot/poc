@@ -153,27 +153,30 @@ async function addInviteUse(member, invite) {
 async function getGuildInvites(guildOBJ) {
 	let invites = [];
 	// First get the vanityURL if it exists
-	if (guildOBJ.vanityURLCode !== null) {
-		if (guildOBJ.vanityURLUses === null) {
-			invites.push({
-				code: guildOBJ.vanityURLCode,
-				inviter: "VANITY_URL",
-				uses: 0,
-				deleted: false
-			});
-		} else {
-			invites.push({
-				code: guildOBJ.vanityURLCode,
-				inviter: "VANITY_URL",
-				uses: guildOBJ.vanityURLUses,
-				deleted: false
-			});
+	let vanity = await guildOBJ.fetchVanityData();
+	if (vanity) {
+		if (vanity.code !== null) {
+			if (vanity.uses === null) {
+				invites.push({
+					code: vanity.code,
+					inviter: "VANITY_URL",
+					uses: 0,
+					deleted: false
+				});
+			} else {
+				invites.push({
+					code: vanity.code,
+					inviter: "VANITY_URL",
+					uses: vanity.uses,
+					deleted: false
+				});
+			}
 		}
 	}
 	// get all the invites of the guild and put them into the invites object
-	await guildOBJ.fetchInvites().then((inv) => {
+	await guildOBJ.invites.fetch().then((inv) => {
 		inv.forEach((i,k)=>{
-			if (i.code !== guildOBJ.vanityURLCode) {
+			if (i.code !== vanity.code) {
 				// Currently unknown if Vanity is included. Can't hurt to leave this here.
 				invites.push({
 					code: i.code,

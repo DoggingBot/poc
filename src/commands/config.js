@@ -8,7 +8,7 @@ async function configure(m,p) {
 	
 	// DEFAULT SERVER CONFIGURATIONS
 	var cfg = {
-		serverID: m.guild.id,
+		serverID: m.guild.id, // DB alteration ID => Id
 		commandPrefix: ".",
 		botMasterRole: null,
 		modUserRole: null,
@@ -130,7 +130,7 @@ async function configure(m,p) {
 		
 		await reloadConfig(m.guild.id);
 		var msg = "";
-		if (CONFIG.servers[m.guild.id].serverID = m.guild.id) {
+		if (CONFIG.servers[m.guild.id].serverID = m.guild.id) { // DB alteration ID => Id
 			msg = "Server initial configuration successful." +
 			  "\r\nYour current Configuration: " + 
 		    	"\r\n```" +
@@ -163,7 +163,7 @@ async function configure(m,p) {
 				
 				"\r\nYou **must** set a botMasterRole, botUserRole, drunktankRole, and minorRole before you can start the bot fully. The Channel configs are *recommended* to be different channels.\r\n" +
 		 
-				"\r\nUse raw IDs for all roles, users, and channels." +
+				"\r\nUse raw Ids for all roles, users, and channels." +
 				"\r\nUse 0 (false) or 1 (true) for any true/false/yes/no values." +
 				"\r\nType `.configure <setting> help` for additional information." +
 				"\r\nExecute the command `.configure start` to confirm configuration and begin the bot.";
@@ -203,7 +203,7 @@ async function resolveCommand(message) {
 		var queryConfig = {
 			update: "config",
 			sets: "startServer = ?",
-			where: "serverID = ?",
+			where: "serverID = ?", // DB alteration ID => Id
 			values: [true, message.guild.id]
 		};
 		
@@ -250,11 +250,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role needed to configure the bot. Accepts a role ID. Anyone with Administrator Permission is also a Bot Master.";
+					"\r\nInfo: Sets the role needed to configure the bot. Accepts a role Id. Anyone with Administrator Permission is also a Bot Master.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -270,11 +270,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role that is considered above normal botUsers. Accepts a role ID. Anyone with Administrator Permission is also a Mod User. **OPTIONAL**";
+					"\r\nInfo: Sets the role that is considered above normal botUsers. Accepts a role Id. Anyone with Administrator Permission is also a Mod User. **OPTIONAL**";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -290,11 +290,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role needed to run bot commands (except configuration). Accepts a role ID. Anyone with Administrator Permission is also a Bot User.";
+					"\r\nInfo: Sets the role needed to run bot commands (except configuration). Accepts a role Id. Anyone with Administrator Permission is also a Bot User.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -310,11 +310,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role that doesn't count towards saved limits on channels. Accepts a role ID. Don't use a role that is used in any other configuration. All botUsers, modUsers, the botMaster, and all Administrators are uncounted.";
+					"\r\nInfo: Sets the role that doesn't count towards saved limits on channels. Accepts a role Id. Don't use a role that is used in any other configuration. All botUsers, modUsers, the botMaster, and all Administrators are uncounted.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -330,11 +330,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the DrunkTank role that the bot will give to users when they are tanked. Accepts a role ID.";
+					"\r\nInfo: Sets the DrunkTank role that the bot will give to users when they are tanked. Accepts a role Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -350,11 +350,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role that the bot will give to users when they are suspected of being underage. Accepts a role ID.";
+					"\r\nInfo: Sets the role that the bot will give to users when they are suspected of being underage. Accepts a role Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -370,11 +370,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the role that the bot will give to users when they are age verified. Accepts a role ID.";
+					"\r\nInfo: Sets the role that the bot will give to users when they are age verified. Accepts a role Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <roleId>`";
 					break;
 			}
 			break;
@@ -390,11 +390,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where tanked users will see messages. Accepts a channel ID.";
+					"\r\nInfo: Sets the channel where tanked users will see messages. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -410,11 +410,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where suspected minors will see messages. Accepts a channel ID.";
+					"\r\nInfo: Sets the channel where suspected minors will see messages. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -430,11 +430,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where tank actions will be logged. Accepts a channel ID.";
+					"\r\nInfo: Sets the channel where tank actions will be logged. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -450,11 +450,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where invites, joins, and, leaves will be logged. Accepts a channel ID.";
+					"\r\nInfo: Sets the channel where invites, joins, and, leaves will be logged. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -470,11 +470,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: If a message containing a mention is edited to remove a mention, it gets logged to this channel. Accepts a channel ID.";
+					"\r\nInfo: If a message containing a mention is edited to remove a mention, it gets logged to this channel. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -490,11 +490,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where user name changes will be logged. Accepts a channel ID.";
+					"\r\nInfo: Sets the channel where user name changes will be logged. Accepts a channel Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -510,11 +510,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + CONFIG.servers[message.guild.id][setting] +
-					"\r\nInfo: Sets the channel where mod-level logs will be sent. Accepts a channel ID. Set this to a channel that is not accessible by botUserRole.";
+					"\r\nInfo: Sets the channel where mod-level logs will be sent. Accepts a channel Id. Set this to a channel that is not accessible by botUserRole.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " set <channelId>`";
 					break;
 			}
 			break;
@@ -552,11 +552,11 @@ async function resolveCommand(message) {
 				  break;
 				case "help":
 					msg += setting + ": " + (CONFIG.servers[message.guild.id][setting] !== null ? CONFIG.servers[message.guild.id][setting].join(", ") : "***NOT SET***") +
-					"\r\nInfo: Add/Remove a role or user to a group that will be ignored by this bot. Accepts a role or user ID. This setting is preconfigured to include this bot.";
+					"\r\nInfo: Add/Remove a role or user to a group that will be ignored by this bot. Accepts a role or user Id. This setting is preconfigured to include this bot.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleID | userID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleId | userId>`";
 					break;
 			}
 			break;
@@ -593,11 +593,11 @@ async function resolveCommand(message) {
 					break;
 				case "help":
 					msg += setting + ": " + (CONFIG.servers[message.guild.id][setting] !== null ? CONFIG.servers[message.guild.id][setting].join(", ") : "***NOT SET***") +
-					"\r\nInfo: Add/Remove roles that the bot will not grant or remove from a user. Accepts a role ID.";
+					"\r\nInfo: Add/Remove roles that the bot will not grant or remove from a user. Accepts a role Id.";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleId>`";
 					break;
 			}
 			break;
@@ -634,11 +634,11 @@ async function resolveCommand(message) {
 					break;
 				case "help":
 					msg += setting + ": " + (CONFIG.servers[message.guild.id][setting] !== null ? CONFIG.servers[message.guild.id][setting].join(", ") : "***NOT SET***") +
-					"\r\nInfo: Add/Remove a role that the bot will be unable to tank. Accepts a role ID. Bot Users, Mod Users, Bot Masters, and anyone with Administrator permissions are normally untankable, please don't add them (This is already checked).";
+					"\r\nInfo: Add/Remove a role that the bot will be unable to tank. Accepts a role Id. Bot Users, Mod Users, Bot Masters, and anyone with Administrator permissions are normally untankable, please don't add them (This is already checked).";
 				  break;
 				default:
 				  msg += "Invalid argument. Correct Usage: `" + 
-					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleID>`";
+					CONFIG.servers[message.guild.id].commandPrefix + command + " " + setting + " add|remove <roleId>`";
 					break;
 			}
 			break;
@@ -903,7 +903,7 @@ async function updateConfig(guild, setting, value) {
 	query = {
 		update: 'config',
 		sets: setting + " = ?",
-		where: "serverID = ?",
+		where: "serverID = ?", // DB alteration ID => Id
 		values: [value, guild]
 	};
 	
@@ -940,10 +940,10 @@ async function updateConfig(guild, setting, value) {
 }
 
 async function reloadConfig(g) {
-	var rec = await MANAGERS.dbConnectionManager.Query({"select": "config", "columns":["*"], "where": "serverID = ?", "orderby": "serverID", "values":[g]});
+	var rec = await MANAGERS.dbConnectionManager.Query({"select": "config", "columns":["*"], "where": "serverID = ?", "orderby": "serverID", "values":[g]}); // DB alteration ID => Id
 	if (rec.length) {
 		rec.forEach((e) => {
-			CONFIG.servers[e.serverID.toString()] = e;
+			CONFIG.servers[e.serverID.toString()] = e; // DB alteration ID => Id
 		});
 		rec = {};
 		rec[g] = CONFIG.servers[g];

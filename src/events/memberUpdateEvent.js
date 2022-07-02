@@ -134,8 +134,8 @@ async function handle(oldMember, newMember, event) {
 					} else if (CONFIG.servers[oldMember.guild.id].minorRole) {
 						minorUserJson = await SERVICES.persistenceService.getMinorUsers(oldMember.guild.id,oldMember.id);
 						correctUser = false;
-						Object.entries(minorUserJson).forEach(([userID,userObj]) => {
-							if (userID === oldMember.id) {
+						Object.entries(minorUserJson).forEach(([userId,userObj]) => {
+							if (userId === oldMember.id) {
 								// This record is for the correct user that still needs to verify their age
 								correctUser = true;
 								minorUserJson = userObj;

@@ -22,6 +22,10 @@ The Bot will react to the following events:
 * a member has the drunktankRole taken away
 * a member joining - if they have been drunk tanked in the past, it will update the state so their are reflected as tanked in .checktank. NB: This will NOT grant the role back itself, it expects a Role Persistence bot to do this for us. Role persistence may be incorporated at a later date.
 * a member leaving - it will mark the member as archived but still tanked, so they do not appear in checktank whilst they are not a member of the server.
+* a member joining/changing/leaving a Voice Channel - it will increase/decrease the user limit according to users with the uncountedLimitRole and the saved channels in the channelLimits table (db)
+* message edits - logs previous message content that have altered the mentioned users.
+* nickname and username updates - logs the old and new nickname or username.
+* member role updates - logs the role that was given or taken away and who did it.
 
 The Bot will respond to the following commands:
 * .tank - drunk tanks a user. usage: .tank @user reason.

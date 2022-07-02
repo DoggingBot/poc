@@ -28,7 +28,7 @@ async function handle(message) {
 				var timeServed = ts > o.time_to_untank ? true : false;
 				if (inServer === undefined) {
 					// user is not in the server, find out if it was an uncaught ban
-					var isBanned = await message.guild.fetchBan(o.user_tanked).catch((e)=>{return false;});
+					var isBanned = await message.guild.bans.fetch(o.user_tanked).catch((e)=>{return false;});
 					if (isBanned) {
 						// ban exists and was not caught yet. Close out the tank record and move on to the next tank record.
 						var user = await message.client.users.fetch(o.user_tanked);
@@ -90,7 +90,7 @@ async function handle(message) {
 		var timesUp = ts > o.ban_by ? " **Ask a mod to** <:banhammer:772993003656577054> " : "";
 		if (inServer === undefined) {
 			// user is not in the server, find out if it was an uncaught ban
-			var isBanned = await message.guild.fetchBan(o.user).catch((e)=>{return false;});
+			var isBanned = await message.guild.bans.fetch(o.user).catch((e)=>{return false;});
 			if (isBanned) {
 				// ban exists and was not caught yet. Purge the record.
 				await SERVICES.persistenceService.removeMinor(message.guild.id, o.user);

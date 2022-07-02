@@ -135,10 +135,6 @@ function parseDurationFromTokens(tokens, guild) {
     }
 }
 
-function getOldRoles(tankedMember){
-    return Array.from(tankedMember.roles.cache.mapValues(role => role.id).keys());
-} 
-
 function removeRoleFromArray(roleArray, roleIdToRemove) {
     if (roleArray == undefined) {
         return [];
@@ -178,7 +174,7 @@ function convertDataFromDB(data,method) {
 	if (method === "cfg") {
 		Object.entries(data).forEach(([i,o]) => {
 			tmp[i.toString()] = {};
-			tmp[i.toString()].serverID = o.serverID.toString();
+			tmp[i.toString()].serverID = o.serverID.toString(); // DB alteration ID => Id
 			tmp[i.toString()].commandPrefix = o.commandPrefix.toString();
 			tmp[i.toString()].botMasterRole = o.botMasterRole === null ? null : o.botMasterRole.toString();
             tmp[i.toString()].modUserRole = o.modUserRole === null ? null : o.modUserRole.toString();

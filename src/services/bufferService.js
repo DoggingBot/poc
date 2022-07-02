@@ -17,9 +17,9 @@ async function queryDB() {
 	query = null;
 }
 
-async function getBuffers() {
+async function getBuffers(guildId) {
 	query = {
-			select: guild + "_buffers",
+			select: guildId + "_buffers",
 			columns: ["*"],
 			where: "?",
 			orderby: "time",
@@ -31,9 +31,9 @@ async function getBuffers() {
 	});
 }
 
-async function saveBuffer(channel, msg) {
+async function saveBuffer(guildId, channel, msg) {
 	query = {
-		insert: guildID + "_buffers",
+		insert: guildId + "_buffers",
 		columns: ["time","channel","msg"],
 		valueHolders: "(?,?,?)",
 		values: [Date.now(),channel,msg]
@@ -41,13 +41,13 @@ async function saveBuffer(channel, msg) {
 	queryDB();
 }
 
-async function deleteBuffers(b) {
+async function deleteBuffers(guildId, b) {
 	var wv = [];
 	b.forEach((e) => {
 		wv.push("?");
 	});
 	query = {
-		del: guildID + "_buffers",
+		del: guildId + "_buffers",
 		where: "id IN (" + wv.join + ")",
 		values: b
 	};

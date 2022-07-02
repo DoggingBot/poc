@@ -51,7 +51,7 @@ async function handle(message) {
                 }
             })
             .then(()=>{
-                message.delete({reason: "Fake/Scam link detected"});
+                message.delete();
                 return true;
             });
         }

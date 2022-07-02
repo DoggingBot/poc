@@ -17,12 +17,12 @@ async function writeToChannel(channel, message, doBuffer) {
 		var ch = TheGuild.channels.cache.get(use_channel);
 		if (((ch === undefined) || (ch === null)) && (doBuffer)) {
 			// The channel is no longer correct, save the message to the buffers
-			SERVICES.bufferService.saveBuffer(channel,message);
+			SERVICES.bufferService.saveBuffer(TheGuild.id,channel,message);
 			// now notify Admins of the occurence in the systemChannel
 			var msg = "<@&" + CONFIG.servers[TheGuild.id].botMasterRole + "> the invites channel doesn't exist!" + 
 			"\r\n Run " + "`" + CONFIG.servers[TheGuild.id].commandPrefix + "config " + channel.replace("Channel","") + " <channel>` to fix it.";
 			
-			await writeToChannel(Theguild.systemChannelID, msg);
+			await writeToChannel(Theguild.systemChannelID, msg); // DB alteration ID => Id
 		}
     return ch.send(message);
 }
@@ -69,7 +69,7 @@ async function getMemberForceLoad(userId) {
 }
 
 async function isBypassingGMU(guildMember) {
-	// discover if the guildMember's ID or roleIDs are in the bypassing group.
+	// discover if the guildMember's Id or roleIds are in the bypassing group.
 	// First iterate over all roles the guildMember has.
 	var foundRole = false;
 	guildMember = await getMemberForceLoad(guildMember);
@@ -79,7 +79,7 @@ async function isBypassingGMU(guildMember) {
 			foundRole = true;
 		}
 	});
-	// check if we found a matching role or if the user ID itself is in the group.
+	// check if we found a matching role or if the user Id itself is in the group.
 	if (CONFIG.servers[TheGuild.id].bypassGMU.includes(guildMember.id) || foundRole) {
 		return true;
 	}
@@ -158,7 +158,7 @@ async function disconnectMemberFromVC(userId) {
     try {
         if (userObj.voice != undefined) {
             if (userObj.voice.channel != undefined) {
-                await userObj.voice.kick(); // v13 is .disconnect()
+                await userObj.voice.disconnect();
                 return true;
             }
         }

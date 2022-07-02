@@ -1,6 +1,6 @@
 {
   "name": "tank_commander",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Drunk Tank bot",
   "main": "main.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.7.2",
-    "discord.js": "12.5.3",
+    "discord.js": "13.8.1",
     "dotenv": "^10.0.0",
     "moment": "^2.29.1",
     "mysql2": "^2.3.2",
@@ -22,5 +22,5 @@
   "devDependencies": {
     "jest": "^27.0.6"
   },
-  "nodeVersion": "12.16.3"
+  "nodeVersion": "^16.6.0"
 }

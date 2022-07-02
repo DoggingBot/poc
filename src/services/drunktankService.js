@@ -146,7 +146,7 @@ async function untankUser(guildId, untankedMember, author, untankedMemberJson, r
     } else {
         datediff = "unknown";
     }
-    //Convert the role ID's to strings for readable output, or skip it if they had none
+    //Convert the role Id's to strings for readable output, or skip it if they had none
 		if (untankedMemberJson.roles_to_give_back.join() !== "") {
 			rolesToGiveBackStr = await HELPERS.helpers.convertRoleIdArrayToRoleNameArray(rolesToGiveBack, SERVICES.guildService);
 		}

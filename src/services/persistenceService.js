@@ -10,7 +10,7 @@ async function queryDB(getColumns) {
 /*
 Save an individual user tanking event as a new record
 */
-async function saveTanking(guildID, userTanked, tankedBy, reason, duration, uom, oldRoles) {
+async function saveTanking(guildId, userTanked, tankedBy, reason, duration, uom, oldRoles) {
     let ts = Date.now();
     let untank_time = 0;
     
@@ -27,19 +27,19 @@ async function saveTanking(guildID, userTanked, tankedBy, reason, duration, uom,
     }
 
     tankee_obj = {
-        time_tanked: ts,
-		user_tanked: userTanked,
-        tanked_by: tankedBy,
-        tank_reason: reason,
-        time_to_untank: untank_time,
-        roles_to_give_back: oldRoles.join(","),
-        time_untanked: null,
-		untanked_by: null,
-		untanked_reason: null
+			time_tanked: ts,
+			user_tanked: userTanked,
+			tanked_by: tankedBy,
+			tank_reason: reason,
+			time_to_untank: untank_time,
+			roles_to_give_back: oldRoles.join(","),
+			time_untanked: null,
+			untanked_by: null,
+			untanked_reason: null
     }
 		
 		query = {
-			insert: guildID + "_tankees",
+			insert: guildId + "_tankees",
 			columns: Object.keys(tankee_obj),
 			valueHolders: [],
 			values: []
@@ -60,11 +60,11 @@ async function saveMinor(guildId, minorUserId, staffId, oldRoles) {
     let ts = Date.now();
     let deadline = ts + (CONFIG.servers[guildId].verifyAgeBy * 3600000);
     minor_obj = {
-        time: ts,
-		user: minorUserId,
-        staff_user: staffId,
-        ban_by: deadline,
-        roles_to_give_back: oldRoles.join(",")
+			time: ts,
+			user: minorUserId,
+			staff_user: staffId,
+			ban_by: deadline,
+			roles_to_give_back: oldRoles.join(",")
     }
 		
 	query = {
@@ -85,11 +85,11 @@ async function saveMinor(guildId, minorUserId, staffId, oldRoles) {
 /*
 Update a tanked user record to be untanked
 */
-async function saveUntanking(guildID, userIdToUntank, untanker, untankReason) {
+async function saveUntanking(guildId, userIdToUntank, untanker, untankReason) {
 		let ts = Date.now();
 		
 		query = {
-			update: guildID + "_tankees",
+			update: guildId + "_tankees",
 			sets:  "time_untanked = ?, untanked_by = ?, untanked_reason = ?",
 			where: "((time_untanked IS NULL) AND (user_tanked = ?))",
 			values: [ts,untanker,untankReason,userIdToUntank]
@@ -112,27 +112,27 @@ async function removeMinor(guildId, adultMember) {
 /*
 returns a json array of all currently tanked users from guild
 function will not filter results unless second arg evaluates to true
-function accepts third arg as userID to get only one user -- used instead of getUser()
+function accepts third arg as userId to get only one user -- used instead of getUser()
 */
-async function getTankedUsers(guild, filter, user) {
+async function getTankedUsers(guildId, filter, userId) {
     if (arguments.length === 1) {
 			filter = false;
 		}
 		if (arguments.length === 2) {
-		  user = false;
+		  userId = false;
 		}
 		
 		query = {
-			select: guild + "_tankees",
+			select: guildId + "_tankees",
 			columns: ["*"],
 			where: "?",
 			values: [1]
 		};
 		
 		if (filter) {
-			if (user) {
+			if (userId) {
 			  query.where = "((user_tanked = ?) AND (time_untanked IS NULL))";
-				query.values = [user];
+				query.values = [userId];
 			} else {
 				query.where = "time_untanked IS NULL";
 				query.values = [];
@@ -155,30 +155,30 @@ async function getTankedUsers(guild, filter, user) {
 /*
 returns a json array of all currently suspected minor users from guild
 function will not filter results unless second arg evaluates to true
-function accepts third arg as userID to get only one user
+function accepts third arg as userId to get only one user
 */
-async function getMinorUsers(guild, user) {
+async function getMinorUsers(guildId, userId) {
     if (arguments.length === 1) {
-		user = false;
+		userId = false;
 	}
 		
 	query = {
-		select: guild + "_ageVerify",
+		select: guildId + "_ageVerify",
 		columns: ["*"],
 		where: "?",
 		values: [1]
 	};
 	
-	if (user) {
+	if (userId) {
 		query.where = "user = ?";
-		query.values = [user];
+		query.values = [userId];
 	}
 
 	await queryDB()
 	.then(() => {
 		tankees = {}; // no need for a separately named variabled here, so just use what already exists.
 		qResults.forEach((e) => {
-			tankees[e.user] = e; // unlike tank records, we organize by user ID because we aren't tracking stats on this.
+			tankees[e.user] = e; // unlike tank records, we organize by user Id because we aren't tracking stats on this.
 		});
 	})
 	
@@ -191,8 +191,8 @@ async function getMinorUsers(guild, user) {
 /*
 Add a sip to the sip json 
 */
-async function addSip(guild, sipStr, userID, t) {
-    var u = await getSipCountForUser(guild,userID);		
+async function addSip(guildId, sipStr, userId, t) {
+    var u = await getSipCountForUser(guildId,userId);		
 		// the sipstring was already validated, so it is safe to concat it into the columns.
 		// Check for minimum time between sips
 		if ((u !== undefined) && (t - u.lastSip < 7000)) { // 7 seconds minimum sounds reasonable between sips
@@ -202,19 +202,19 @@ async function addSip(guild, sipStr, userID, t) {
 			if (u !== undefined) {
 				u[sipStr]++;
 				query = {
-					update: guild + "_sips",
+					update: guildId + "_sips",
 					sets: "lastSip = ?," + sipStr + " = ?",
 					where: "(userId = ?)",
-					values: [t,(u[sipStr]),userID]
+					values: [t,(u[sipStr]),userId]
 				};
 			} else {
-				u = {userId: userID};
+				u = {userId: userId};
 				u[sipStr] = 1;
 				query = {
-					insert: guild + "_sips",
+					insert: guildId + "_sips",
 					columns: ["userId","lastSip",sipStr],
 					valueHolders: "(?,?,?)",
-					values: [userID,t,1]
+					values: [userId,t,1]
 				};
 			}
 			await queryDB();
@@ -225,10 +225,10 @@ async function addSip(guild, sipStr, userID, t) {
 /*
 Return a list of all historical sips
 */
-async function getAllSips(guild) {
+async function getAllSips(guildId) {
 		let rData = {structure: [], data: []};
 		query = {
-			select: guild + "_sips",
+			select: guildId + "_sips",
 			columns: ["*"],
 			where: "?",
 			values: [1]
@@ -247,12 +247,12 @@ async function getAllSips(guild) {
 /*
 Return the sip count for an individual user
 */
-async function getSipCountForUser(guild, userID) {
+async function getSipCountForUser(guildId, userId) {
 		query = {
-			select: guild + "_sips",
+			select: guildId + "_sips",
 			columns: ["*"],
 			where: "userId = ?",
-			values: [userID]
+			values: [userId]
 		}
 		await queryDB();
 		return qResults[0];

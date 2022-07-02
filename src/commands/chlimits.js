@@ -1,5 +1,5 @@
 function help(prefix) {
-  return prefix + "chlimits - manage limited channel limits. usage: `" + prefix + "chlimits <channelID> <limit>`\r\n" +
+  return prefix + "chlimits - manage limited channel limits. usage: `" + prefix + "chlimits <channelId> <limit>`\r\n" +
     "  omit arguments to get the list of all channel limits\r\n" +
     "  limit must be between 1 and 99, or 0 to remove it";
 }
@@ -44,15 +44,15 @@ async function handle(message) {
 			return message.channel.send(msg[2] + " is not a valid limit.");
 		}
 		
-		let result = await setLimit(message.guild.id, ch, lim).catch((e)=>{return "Failed to save channel limit - ChannelID: " + ch + " , Limit: " + lim;});
+		let result = await setLimit(message.guild.id, ch, lim).catch((e)=>{return "Failed to save channel limit - ChannelId: " + ch + " , Limit: " + lim;});
 		return message.channel.send(result);
   }
 }
 
-async function getLimits(guildID, channelID) {
+async function getLimits(guildId, channelId) {
 	// Does table exist?
 	let query = {
-		select: guildID + "_channelLimits",
+		select: guildId + "_channelLimits",
 		columns: ["*"],
 		where: "?",
 		values: [1]
@@ -64,7 +64,7 @@ async function getLimits(guildID, channelID) {
 		query = {
 			create: guildID + "_channelLimits",
 			columns: [
-				"`channelID` VARCHAR(20) NOT NULL PRIMARY KEY",
+				"`channelID` VARCHAR(20) NOT NULL PRIMARY KEY", // DB alteration ID => Id
 				"`limit` TINYINT(2) UNSIGNED NOT NULL"
 			]
 		}
@@ -73,15 +73,15 @@ async function getLimits(guildID, channelID) {
 	}
 	
 	query = {
-		select: guildID + "_channelLimits",
+		select: guildId + "_channelLimits",
 		columns: ["*"],
 		where: "?",
 		values: [1]
 	};
 	
 	if (arguments.length === 2) {
-		query.where = "channelID = ?";
-		query.values = [channelID];
+		query.where = "channelID = ?"; // DB alteration ID => Id
+		query.values = [channelId];
 	}
 	
 	let recs = await MANAGERS.dbConnectionManager.Query(query);
@@ -90,43 +90,43 @@ async function getLimits(guildID, channelID) {
 	}
 	let lims = {}; 
 	recs.forEach((o,i)=>{
-		lims[o.channelID] = parseInt(o.limit);
+		lims[o.channelID] = parseInt(o.limit); // DB alteration ID => Id
 	});
 	return lims;
 }
 
-async function setLimit(guildID, channelID, limit) {
-	// see if the channel exists, update/insert as needed. limit 0 on channelID that isn't set is invalid.
-	var r = await getLimits(guildID, channelID);
+async function setLimit(guildId, channelId, limit) {
+	// see if the channel exists, update/insert as needed. limit 0 on channelId that isn't set is invalid.
+	var r = await getLimits(guildId, channelId);
 	var query = {};
 	var response = "";
 	if (r["No channel limits have been set"]) {
 		// Doesn't exist, insert it
 		query = {
 			insert: guildID + "_channelLimits",
-			columns: ["`channelID`","`limit`"],
+			columns: ["`channelID`","`limit`"], // DB alteration ID => Id
 			valueHolders: "(?,?)",
-			values: [channelID, limit]
+			values: [channelId, limit]
 		};
-		response = "Added channel ID " + channelID + " with limit " + limit;
+		response = "Added channel Id " + channelId + " with limit " + limit;
 	} else {
 		// Update or delete
 		if (limit === 0) {
 			// Delete
 			query = {
 				del: guildID + "_channelLimits",
-				where: "channelID = ?",
-				values: [channelID]
+				where: "channelID = ?", // DB alteration ID => Id
+				values: [channelId]
 			}
-			response = "Removed channel limit: " + channelID;
+			response = "Removed channel limit: " + channelId;
 		} else {
 			query = {
 				update: guildID + "_channelLimits",
 				sets: "limit = ?",
-				where: "channelID = ?",
-				values: [limit, channelID]
+				where: "channelID = ?", // DB alteration ID => Id
+				values: [limit, channelId]
 			}
-			response = "Updated channel ID " + channelID + " with limit " + limit;
+			response = "Updated channel Id " + channelId + " with limit " + limit;
 		}
 	}
 	let testQuery = await MANAGERS.dbConnectionManager.Query(query);

@@ -1,15 +1,15 @@
 function help(prefix) {
-    return prefix + "banlist - Obtains ban details for the server or a specific user. Usage: `" + prefix + "banlist [userMention | UserID]`\r\n";
+    return prefix + "banlist - Obtains ban details for the server or a specific user. Usage: `" + prefix + "banlist [userMention | UserId]`\r\n";
 }
 
 async function handle(message) {
 	let bannedUser = false;
 	if (message.mentions.users.size !== 0) {
-		bannedUser = await message.guild.fetchBan(message.mentions.users.first().id).catch((e)=>{return "notBanned";});
+		bannedUser = await message.guild.bans.fetch(message.mentions.users.first().id).catch((e)=>{return "notBanned";});
 	} else if (message.content.split(" ").length > 1) {
 		bannedUser = (/^\d{1,20}$/).test(message.content.split(" ")[1]) ? await message.client.users.fetch(message.content.split(" ")[1]).catch((e)=>{return "invalid";}) : "invalid";
 		if (bannedUser !== "invalid") {
-			bannedUser = await message.guild.fetchBan(bannedUser.id).catch((e)=>{return "notBanned";});
+			bannedUser = await message.guild.bans.fetch(bannedUser.id).catch((e)=>{return "notBanned";});
 		}
 	}
 	
@@ -24,7 +24,7 @@ async function handle(message) {
 	}
 	
 	// Wants all the bans. Fetch them all, and dump them into the banlist channel -- update to find channel by name, hardcoded for now
-	let banlist = await message.guild.fetchBans()
+	let banlist = await message.guild.bans.fetch()
 	.catch((e)=>{
 		return "Error: " + e;
 	});

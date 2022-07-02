@@ -4,7 +4,7 @@ we want to catch any member joining or leaving a channel
 */
 async function handle(oldState, newState) {
 	// Check channel information
-    if (oldState.channelID === newState.channelID) {
+    if (oldState.channelId === newState.channelId) {
         // No change in channel.
         return false;
     }
@@ -18,21 +18,21 @@ async function handle(oldState, newState) {
         //(oldState.member.permissions.has(1 << 3)) // Anyone with admin permission
     ) {
         if (
-            (oldState.channelID === null) && (newState.channelID !== null))
+            (oldState.channelId === null) && (newState.channelId !== null))
         {
             // Staff Connected to channel
             await updateLimit(newState.guild.id, newState.channel, 1);
         }
 
         if (
-            (oldState.channelID !== null) && (newState.channelID === null))
+            (oldState.channelId !== null) && (newState.channelId === null))
         {
             // Staff disconnected from channel
             await updateLimit(newState.guild.id, oldState.channel, -1);
         }
 
         if (
-            (oldState.channelID !== null) && (newState.channelID !== null))
+            (oldState.channelId !== null) && (newState.channelId !== null))
         {
             // Staff moved to another channel.
             await updateLimit(newState.guild.id, oldState.channel, -1);
@@ -41,8 +41,8 @@ async function handle(oldState, newState) {
     }
 }
 
-async function updateLimit(guildID, channelObj, amt) {
-    let ch = await COMMANDS.chlimits.getLimits(guildID, channelObj.id);
+async function updateLimit(guildId, channelObj, amt) {
+    let ch = await COMMANDS.chlimits.getLimits(guildId, channelObj.id);
     if (Object.keys(ch)[0] !== 'No channel limits have been set') {
         // Is a saved limited channel
         if (amt + channelObj.userLimit < ch[channelObj.id]) {
